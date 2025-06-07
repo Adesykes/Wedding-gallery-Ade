@@ -1,0 +1,76 @@
+body {
+  font-family: sans-serif;
+  background: #fdf5f5;
+  margin: 0;
+  padding: 1rem;
+  color: #333;
+}
+
+.page {
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+}
+
+input[type="file"] {
+  margin: 1rem 0;
+}
+
+button {
+  background: #d97d7d;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #b14c4c;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  padding: 1rem 0;
+}
+
+.photo-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.photo-thumb:hover {
+  transform: scale(1.03);
+}
+
+.lightbox {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.lightbox img {
+  max-width: 95vw;
+  max-height: 90vh;
+  border-radius: 10px;
+}
+input[type="password"] {
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-top: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 80%;
+  max-width: 300px;
+}
