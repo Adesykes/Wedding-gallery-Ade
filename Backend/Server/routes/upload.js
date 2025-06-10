@@ -4,7 +4,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
-const Photo = require('../models/photo');
+const Photo = require('../models/Photo');
 const ImageKit = require('imagekit');
 
 // Setup multer for temp file storage
