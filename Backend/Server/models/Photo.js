@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Photo = require('./Photo');
+const Photo = require('../models/Photo');
 
 const photoSchema = new mongoose.Schema({
   url: String,
