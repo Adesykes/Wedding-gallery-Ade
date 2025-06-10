@@ -14,7 +14,7 @@ export default function GuestGalleryUpload() {
 
   // Load photos initially
   useEffect(() => {
-    fetch('/api/photos')
+    fetch(`${API_BASE}/api/photos`)
       .then(res => res.json())
       .then(data => setPhotos(Array.isArray(data) ? data : []))
       .catch(console.error)
