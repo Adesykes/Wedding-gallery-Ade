@@ -84,7 +84,7 @@ export default function GuestGalleryUpload() {
         const formData = new FormData();
         formData.append('photo', file); // file is the File object from input
 
-        const res = await fetch('/api/upload', {
+        const res = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
           body: formData,
         });
