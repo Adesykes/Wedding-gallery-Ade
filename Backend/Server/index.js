@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const cors = require('cors');
 
 const uploadRoutes = require('./routes/upload');
 const photosRoutes = require('./routes/photos');    // for /api/photos
@@ -11,6 +12,10 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cors({
+  origin: https://wedding-gallery-ade.vercel.app/, // replace with your actual Vercel URL
+  credentials: true,
+}));
 
 // Static file serving for uploaded images (adjust if needed)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

@@ -51,4 +51,11 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 });
 
+const API_BASE = process.env.REACT_APP_API_BASE;
+
+const res = await fetch(`${API_BASE}/api/upload`, {
+  method: 'POST',
+  body: formData,
+});
+
 module.exports = router;
