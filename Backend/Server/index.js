@@ -3,15 +3,19 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 
-const uploadRoutes = require('./routes/upload');          // for /api/upload
-const photosRoutes = require('./routes/photos');          // for /api/photos
-const adminRoutes = require('./routes/admin');            // for /api/admin
-const uploadRoute = require('./routes/upload');    // NEW: for /api/upload-b2
+const uploadRoutes = require('./routes/upload');
+const photosRoutes = require('./routes/photos');    // for /api/photos
+const adminRoutes = require('./routes/admin');      // for /api/admin
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+
+// Static file serving for uploaded images (adjust if needed)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
@@ -22,8 +26,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/photos', photosRoutes);
 app.use('/api/admin', adminRoutes);
 
-
-// 404 Handler
+// 404 Handler (should be after all other routes)
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });

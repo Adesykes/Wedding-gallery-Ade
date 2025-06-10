@@ -25,9 +25,8 @@ function AdminDashboard({ onLogout }) {
     if (!window.confirm('Are you sure you want to delete this photo?')) return;
 
     try {
-      await axios.post(
-        '/api/admin/delete',
-        { id: photoId },
+      await axios.delete(
+        `/api/admin/delete/${photoId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
         }
@@ -149,24 +148,6 @@ function AdminDashboard({ onLogout }) {
             ))}
         </div>
       )}
-    </div>
-  );
-}
-
-// Added minimal logout example for clarity
-function AdminDashboardMinimal({ onLogout }) {
-  return (
-    <div>
-      <h2>Admin Dashboard</h2>
-      <button
-        onClick={() => {
-          localStorage.removeItem('adminToken');
-          if (onLogout) onLogout();
-        }}
-      >
-        Logout
-      </button>
-      {/* rest of dashboard */}
     </div>
   );
 }

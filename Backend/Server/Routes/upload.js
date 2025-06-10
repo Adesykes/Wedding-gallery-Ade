@@ -8,7 +8,7 @@ const Photo = require('../models/photo');
 const ImageKit = require('imagekit');
 
 // Setup multer for temp file storage
-const upload = multer({ dest: 'temp/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Initialize ImageKit
 const imagekit = new ImageKit({
@@ -19,38 +19,35 @@ const imagekit = new ImageKit({
 
 // POST /api/upload
 router.post('/', upload.single('photo'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+  // Validate file type
+  if (!req.file.mimetype.startsWith('image/')) {
+    return res.status(400).json({ error: 'Invalid file type' });
   }
 
-  const filePath = req.file.path;
-  const fileName = req.file.originalname;
-  const fileBuffer = fs.readFileSync(filePath);
+  console.log('Mimetype:', req.file.mimetype);
+  console.log('Size:', req.file.size);
+  console.log('Original name:', req.file.originalname);
 
   try {
     const result = await imagekit.upload({
-      file: fileBuffer,
-      fileName: fileName,
-      folder: "wedding",  // Optional, helps organize photos
-      useUniqueFileName: true
+      file: req.file.buffer,
+      fileName: req.file.originalname,
+      folder: '/wedding',
     });
 
-    // Save photo info in MongoDB
+    // Save to MongoDB
     const photo = new Photo({
       url: result.url,
-      createdAt: new Date(),
+      originalName: req.file.originalname,
+      guestId: req.body.guestId || '',
     });
     await photo.save();
 
-    // Delete temp file
-    fs.unlink(filePath, (err) => {
-      if (err) console.error('Failed to delete temp file:', err);
-    });
-
     res.json(photo);
   } catch (err) {
-    console.error('ImageKit upload error:', err);
-    res.status(500).json({ error: 'Failed to upload photo' });
+    res.status(500).json({ error: 'Upload failed', details: err.message });
   }
 });
 

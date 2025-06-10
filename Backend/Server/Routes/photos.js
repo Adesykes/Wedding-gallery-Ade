@@ -4,9 +4,14 @@ const router = express.Router();
 const Photo = require('../models/Photo'); // Adjust the path if needed
 
 // GET /api/photos
-router.get('/', async (req, res) => {
+router.get('/photos', async (req, res) => {
   try {
-    const photos = await Photo.find().sort({ createdAt: -1 });
+    const { guestId } = req.query;
+    let query = {};
+    if (guestId) {
+      query.guestId = guestId;
+    }
+    const photos = await Photo.find(query).sort({ createdAt: -1 });
     res.json(photos); // ✅ Must return an array
   } catch (err) {
     console.error('Error fetching photos:', err);

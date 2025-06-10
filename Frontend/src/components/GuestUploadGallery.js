@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
+import imageCompression from 'browser-image-compression';
 
 const MAX_UPLOADS = 30;
 
@@ -39,14 +40,32 @@ export default function GuestGalleryUpload() {
     setUploadedCountState(getUploadedCount());
   }, []);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     setError(null);
     const files = Array.from(e.target.files);
     if (uploadedCount + files.length > MAX_UPLOADS) {
       setError(`Upload limit exceeded. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
       return;
     }
-    setSelectedFiles(files);
+
+    const compressedFiles = [];
+    for (const file of files) {
+      try {
+        const options = {
+          maxWidthOrHeight: 4000, // ~12MP (4000x3000)
+          maxSizeMB: 4,           // Optional: limit file size (e.g., 4MB)
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        compressedFile.preview = URL.createObjectURL(compressedFile);
+        compressedFile.name = file.name; // preserve original name if needed
+        compressedFiles.push(compressedFile);
+      } catch (err) {
+        setError('Image compression failed');
+        return;
+      }
+    }
+    setSelectedFiles(compressedFiles);
   };
 
   const handleUpload = async () => {
@@ -61,7 +80,7 @@ export default function GuestGalleryUpload() {
     try {
       for (const file of selectedFiles) {
         const formData = new FormData();
-        formData.append('photo', file);
+        formData.append('photo', file); // file is the File object from input
 
         const res = await fetch('/api/upload', {
           method: 'POST',
@@ -86,7 +105,9 @@ export default function GuestGalleryUpload() {
   };
 
   const removeFile = (index) => {
-    URL.revokeObjectURL(selectedFiles[index]?.preview);
+    if (selectedFiles[index]?.preview) {
+      URL.revokeObjectURL(selectedFiles[index].preview);
+    }
     const newFiles = [...selectedFiles];
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
@@ -189,25 +210,56 @@ export default function GuestGalleryUpload() {
             Uploads left: {uploadsLeft > 0 ? uploadsLeft : 0}
           </p>
 
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            capture="environment"
-            onChange={handleFileChange}
-            disabled={uploading || uploadsLeft <= 0}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: 14,
-              borderRadius: 10,
-              border: `2px dashed ${colors.border}`,
-              backgroundColor: '#fff',
-              marginBottom: 25,
+          {/* Two upload options: Take Photo or Choose from Gallery */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 25, justifyContent: 'center' }}>
+            {/* Take Photo */}
+            <label style={{
+              flex: 1,
+              background: colors.primary,
+              color: 'white',
+              padding: '12px 0',
+              borderRadius: 8,
+              textAlign: 'center',
+              fontWeight: 'bold',
               cursor: uploading || uploadsLeft <= 0 ? 'not-allowed' : 'pointer',
+              opacity: uploading || uploadsLeft <= 0 ? 0.6 : 1,
+              border: 'none',
               fontSize: 16,
-            }}
-          />
+            }}>
+              📷 Take Photo
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                disabled={uploading || uploadsLeft <= 0}
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+            {/* Choose from Gallery */}
+            <label style={{
+              flex: 1,
+              background: '#fff',
+              color: colors.primary,
+              padding: '12px 0',
+              borderRadius: 8,
+              textAlign: 'center',
+              fontWeight: 'bold',
+              cursor: uploading || uploadsLeft <= 0 ? 'not-allowed' : 'pointer',
+              opacity: uploading || uploadsLeft <= 0 ? 0.6 : 1,
+              border: `2px solid ${colors.primary}`,
+              fontSize: 16,
+            }}>
+              🖼️ Choose from Gallery
+              <input
+                type="file"
+                accept="image/*"
+                disabled={uploading || uploadsLeft <= 0}
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+          </div>
 
           {selectedFiles.length > 0 && (
             <div style={{
@@ -301,17 +353,29 @@ export default function GuestGalleryUpload() {
             </p>
           )}
 
+          <p style={{ color: '#888', fontSize: 13, textAlign: 'center' }}>
+            Photos will be resized to a maximum of 12 megapixels for faster uploads.
+          </p>
+
           <hr style={{ border: 'none', borderTop: '1px dashed #F3D1DC', margin: '40px 0' }} />
 
           <h3 style={{ marginBottom: 20, color: colors.accent, textAlign: 'center' }}>
             Uploaded Photos
           </h3>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-            gap: 16,
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              overflowX: 'auto',
+              gap: 16,
+              padding: 8,
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#9CAF88 #FDF6F9',
+              background: '#fff',
+              borderRadius: 20,
+              marginBottom: 24,
+            }}
+          >
             {loadingPhotos
               ? Array.from({ length: 6 }).map((_, idx) => <PlaceholderCard key={idx} />)
               : photos.length > 0
@@ -323,18 +387,20 @@ export default function GuestGalleryUpload() {
                       src={photo.url}
                       alt="Wedding upload"
                       style={{
-                        width: '100%',
+                        width: 150,
                         height: 150,
                         objectFit: 'cover',
                         borderRadius: 16,
                         cursor: 'pointer',
                         border: `2px solid ${colors.border}`,
+                        flex: '0 0 auto',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                       }}
                       onClick={() => setPreviewImage(photo.url)}
                       loading="lazy"
                     />
                   ))
-                : <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#aaa' }}>
+                : <p style={{ color: '#aaa', margin: 'auto' }}>
                     No photos uploaded yet.
                   </p>
             }

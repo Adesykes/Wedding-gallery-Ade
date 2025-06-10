@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom scrollbar for horizontal gallery */
+::-webkit-scrollbar {
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #D946EF;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FDF6F9;
+}
+
+html {
+  scroll-behavior: smooth;
+}
