@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import imageCompression from 'browser-image-compression';
 
+const API_BASE = process.env.REACT_APP_API_BASE;
+
 const MAX_UPLOADS = 30;
 
 export default function GuestGalleryUpload() {
