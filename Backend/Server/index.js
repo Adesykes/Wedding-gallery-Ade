@@ -13,7 +13,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: https://wedding-gallery-ade.vercel.app/, // replace with your actual Vercel URL
+  origin: 'https://wedding-gallery-ade.vercel.app',
   credentials: true,
 }));
 

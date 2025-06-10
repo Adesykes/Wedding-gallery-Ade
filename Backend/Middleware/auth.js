@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
-const cors = require('cors');
 
 function isAdminAuthenticated(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -18,10 +17,5 @@ function isAdminAuthenticated(req, res, next) {
     return res.status(401).json({ message: 'Invalid token' });
   }
 }
-
-app.use(cors({
-  origin: 'https://your-frontend-url.vercel.app', // replace with your actual Vercel URL
-  credentials: true,
-}));
 
 module.exports = { isAdminAuthenticated };
