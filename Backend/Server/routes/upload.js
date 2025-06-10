@@ -50,12 +50,4 @@ router.post('/', upload.single('photo'), async (req, res) => {
     res.status(500).json({ error: 'Upload failed', details: err.message });
   }
 });
-
-const API_BASE = process.env.REACT_APP_API_BASE;
-
-const res = await fetch(`${API_BASE}/api/upload`, {
-  method: 'POST',
-  body: formData,
-});
-
 module.exports = router;
