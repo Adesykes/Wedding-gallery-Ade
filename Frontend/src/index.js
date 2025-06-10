@@ -10,3 +10,12 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+
+// ...rest of your code
+
+module.exports = app; // if needed
