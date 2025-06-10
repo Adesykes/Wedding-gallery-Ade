@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Photo = require('./Photo');
 
 const photoSchema = new mongoose.Schema({
   url: String,
