@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Gallery.css'; // We’ll create this next
 
+const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
+
 const GuestGallery = () => {
   const [photos, setPhotos] = useState([]);
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/photos')
+    axios.get(`${API_URL}/api/photos`)
       .then(res => setPhotos(res.data.reverse())) // newest first
       .catch(err => console.error('Failed to load photos:', err));
   }, []);

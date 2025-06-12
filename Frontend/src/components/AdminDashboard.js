@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
+
 function AdminDashboard({ onLogout }) {
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState(null);
@@ -8,7 +10,7 @@ function AdminDashboard({ onLogout }) {
 
   const fetchPhotos = async () => {
     try {
-      const res = await axios.get('/api/photos');
+      const res = await axios.get(`${API_URL}/api/photos`);
       setPhotos(res.data);
       setLoading(false);
     } catch (err) {

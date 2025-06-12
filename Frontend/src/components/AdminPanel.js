@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
+const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
+
 export default function AdminPanel() {
   const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
-    fetch('/api/photos')
+    fetch(`${API_URL}/api/photos`)
       .then(res => res.json())
       .then(setPhotos)
       .catch(console.error);

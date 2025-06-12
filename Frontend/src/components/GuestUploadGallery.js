@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import imageCompression from 'browser-image-compression';
-const API_BASE = process.env.REACT_APP_API_BASE;
+const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 
 const MAX_UPLOADS = 30;
 
@@ -13,9 +13,10 @@ export default function GuestGalleryUpload() {
   const [previewImage, setPreviewImage] = useState(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
-  // Load photos initially
+  // Load photos initially (only for this guest)
   useEffect(() => {
-   fetch(`${API_BASE}/api/photos`)
+    const guestId = getGuestId();
+    fetch(`${API_BASE}/api/photos?guestId=${guestId}`)
       .then(res => res.json())
       .then(data => setPhotos(Array.isArray(data) ? data : []))
       .catch(console.error)
@@ -26,6 +27,16 @@ export default function GuestGalleryUpload() {
   const getUploadedCount = () => {
     const count = localStorage.getItem('uploadCount');
     return count ? parseInt(count, 10) : 0;
+  };
+
+  // Get guestId from localStorage (or generate if not present)
+  const getGuestId = () => {
+    let guestId = localStorage.getItem('guestId');
+    if (!guestId) {
+      guestId = Math.random().toString(36).substr(2, 9) + Date.now();
+      localStorage.setItem('guestId', guestId);
+    }
+    return guestId;
   };
 
   // Set uploaded count in localStorage
@@ -79,10 +90,11 @@ export default function GuestGalleryUpload() {
     setError(null);
 
     try {
+      // When uploading, include guestId in the form data
       for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append('photo', file); // file is the File object from input
-
+        formData.append('guestId', getGuestId());
         const res = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
           body: formData,
