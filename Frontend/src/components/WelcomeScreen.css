@@ -42,7 +42,7 @@
   font-family: 'Playfair Display', 'Lucida Handwriting', cursive;
   font-size: clamp(1.2rem, 4vw, 2rem);
   color: var(--primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   opacity: 0.9;
   animation: dateFloat 6s ease-in-out infinite 0.5s;
 }
@@ -51,7 +51,7 @@
   font-size: clamp(1.1rem, 3vw, 1.3rem);
   color: var(--text);
   max-width: 600px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.5rem;
   line-height: 1.6;
   text-align: center;
   animation: fadeIn 1s ease-out;
