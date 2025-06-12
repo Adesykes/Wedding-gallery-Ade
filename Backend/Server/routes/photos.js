@@ -19,4 +19,24 @@ router.get('/photos', async (req, res) => {
   }
 });
 
+// POST /api/reset-user-count
+router.post('/reset-user-count', async (req, res) => {
+  const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'Stormben1'; // Set this securely in production
+  const { passcode } = req.body;
+
+  if (passcode !== ADMIN_PASSCODE) {
+    return res.status(401).json({ error: 'Invalid admin passcode' });
+  }
+
+  try {
+    // TODO: Reset user count logic here (e.g., update DB, file, etc.)
+    // For now, just log and return success
+    console.log('Admin reset: user count reset');
+    res.json({ message: 'User count has been reset. Photos remain in gallery.' });
+  } catch (err) {
+    console.error('Error resetting user count:', err);
+    res.status(500).json({ error: 'Failed to reset user count' });
+  }
+});
+
 module.exports = router;

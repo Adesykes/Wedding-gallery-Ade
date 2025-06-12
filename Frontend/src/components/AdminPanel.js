@@ -4,6 +4,8 @@ const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 
 export default function AdminPanel() {
   const [photos, setPhotos] = useState([]);
+  const [resetPasscode, setResetPasscode] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
 
   useEffect(() => {
     fetch(`${API_URL}/api/photos`)
@@ -29,6 +31,21 @@ export default function AdminPanel() {
     }
   };
 
+  const handleResetUserCount = async () => {
+    setResetMessage('');
+    const res = await fetch(`${API_URL}/api/reset-user-count`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: resetPasscode })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setResetMessage(data.message || 'User count reset!');
+    } else {
+      setResetMessage(data.error || 'Reset failed');
+    }
+  };
+
   return (
     <div style={{ padding: 20 }}>
       <h2>Admin Panel</h2>
@@ -47,6 +64,21 @@ export default function AdminPanel() {
             </button>
           </div>
         ))}
+      </div>
+
+      <div style={{ margin: '20px 0' }}>
+        <h3>Admin Actions</h3>
+        <input
+          type="password"
+          placeholder="Admin passcode"
+          value={resetPasscode}
+          onChange={e => setResetPasscode(e.target.value)}
+          style={{ marginRight: 8 }}
+        />
+        <button onClick={handleResetUserCount}>
+          Reset User Count
+        </button>
+        {resetMessage && <div style={{ marginTop: 8, color: resetMessage.includes('fail') ? 'red' : 'green' }}>{resetMessage}</div>}
       </div>
     </div>
   );

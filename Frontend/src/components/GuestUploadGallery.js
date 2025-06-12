@@ -163,6 +163,34 @@ export default function GuestGalleryUpload() {
 
   const uploadsLeft = MAX_UPLOADS - uploadedCount;
 
+  // --- Admin Reset User Count ---
+  const [resetPasscode, setResetPasscode] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
+  const handleResetUserCount = async () => {
+    setResetMessage('');
+    if (!resetPasscode) {
+      setResetMessage('Please enter the admin passcode.');
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/reset-user-count`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: resetPasscode })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUploadedCount(0);
+        setUploadedCountState(0);
+        setResetMessage('Your upload count has been reset!');
+      } else {
+        setResetMessage(data.error || 'Reset failed');
+      }
+    } catch (err) {
+      setResetMessage('Reset failed.');
+    }
+  };
+
   return (
     <PageWrapper>
       <style>
@@ -459,6 +487,24 @@ export default function GuestGalleryUpload() {
               </button>
             </div>
           )}
+
+          <div style={{ margin: '32px 0', textAlign: 'center' }}>
+            <h3 style={{ color: colors.primary }}>Reset Upload Count</h3>
+            <input
+              type="password"
+              placeholder="Admin passcode"
+              value={resetPasscode}
+              onChange={e => setResetPasscode(e.target.value)}
+              style={{ padding: 8, borderRadius: 6, border: `1px solid ${colors.border}`, marginRight: 8 }}
+            />
+            <button
+              onClick={handleResetUserCount}
+              style={{ padding: '8px 16px', borderRadius: 6, background: colors.primary, color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+            >
+              Reset My Upload Count
+            </button>
+            {resetMessage && <div style={{ marginTop: 10, color: resetMessage.includes('fail') ? colors.error : colors.accent }}>{resetMessage}</div>}
+          </div>
         </div>
       </div>
     </PageWrapper>
