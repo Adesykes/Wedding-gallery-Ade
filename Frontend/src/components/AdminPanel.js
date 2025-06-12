@@ -33,7 +33,7 @@ export default function AdminPanel() {
 
   const handleResetUserCount = async () => {
     setResetMessage('');
-    const res = await fetch(`${API_URL}/api/reset-user-count`, {
+    const res = await fetch(`${API_URL}/api/photos/reset-user-count`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ passcode: resetPasscode })

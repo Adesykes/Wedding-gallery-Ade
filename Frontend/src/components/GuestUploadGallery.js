@@ -173,7 +173,7 @@ export default function GuestGalleryUpload() {
       return;
     }
     try {
-      const res = await fetch(`${API_BASE}/api/reset-user-count`, {
+      const res = await fetch(`${API_BASE}/api/photos/reset-user-count`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ passcode: resetPasscode })
