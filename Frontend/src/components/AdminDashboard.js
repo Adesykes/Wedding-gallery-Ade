@@ -32,7 +32,7 @@ function AdminDashboard({ onLogout }) {
 
     try {
       await axios.delete(
-        `/api/admin/delete/${photoId}`,
+        `${API_URL}/api/admin/delete/${photoId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
         }
