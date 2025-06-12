@@ -40,6 +40,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
     // Save to MongoDB
     const photo = new Photo({
       url: result.url,
+      fileId: result.fileId, // Store ImageKit fileId
       originalName: req.file.originalname,
       guestId: req.body.guestId || '',
     });

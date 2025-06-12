@@ -4,6 +4,7 @@ const photoSchema = new mongoose.Schema({
   originalName: String,
   createdAt: { type: Date, default: Date.now },
   guestId: String,
+  fileId: String, // ImageKit fileId
   // ...other fields if needed...
 });
 
