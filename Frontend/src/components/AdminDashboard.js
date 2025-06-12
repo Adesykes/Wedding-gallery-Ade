@@ -175,9 +175,16 @@ function AdminDashboard({ onLogout }) {
       ) : (
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-            gap: 10,
+            display: 'flex',
+            flexWrap: 'nowrap',
+            overflowX: 'auto',
+            gap: 16,
+            padding: '10px 0',
+            marginBottom: 24,
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#d9534f #FDF6F9',
+            background: '#fff',
+            borderRadius: 20,
           }}
         >
           {photos
@@ -186,6 +193,8 @@ function AdminDashboard({ onLogout }) {
               <div
                 key={photo._id}
                 style={{
+                  minWidth: 180,
+                  maxWidth: 180,
                   border: selectedPhotos.includes(photo._id) ? '2px solid #d9534f' : '1px solid #ccc',
                   borderRadius: 8,
                   padding: 5,
@@ -193,6 +202,10 @@ function AdminDashboard({ onLogout }) {
                   overflow: 'hidden',
                   background: selectedPhotos.includes(photo._id) ? '#fff0f0' : 'white',
                   boxShadow: selectedPhotos.includes(photo._id) ? '0 0 8px #d9534f44' : undefined,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
                 }}
                 onClick={() => toggleSelectPhoto(photo._id)}
                 title={selectedPhotos.includes(photo._id) ? 'Deselect' : 'Select'}
@@ -200,7 +213,7 @@ function AdminDashboard({ onLogout }) {
                 <img
                   src={photo.url}
                   alt="Uploaded"
-                  style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: 6, cursor: 'pointer' }}
+                  style={{ width: 160, height: 160, objectFit: 'cover', borderRadius: 6, marginBottom: 8 }}
                 />
                 <button
                   onClick={e => { e.stopPropagation(); handleDelete(photo._id); }}
