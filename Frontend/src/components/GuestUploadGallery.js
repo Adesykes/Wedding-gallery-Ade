@@ -150,6 +150,8 @@ export default function GuestGalleryUpload() {
     text: '#4B0082',
     error: '#B91C1C',
     border: '#FBCFE8',
+    success: '#10B981', // Adding success color for reset feedback
+    warning: '#F59E0B',
   };
 
   const PlaceholderCard = () => (
@@ -167,6 +169,7 @@ export default function GuestGalleryUpload() {
   // --- Admin Reset User Count ---
   const [resetPasscode, setResetPasscode] = useState('');
   const [resetMessage, setResetMessage] = useState('');
+
   const handleResetUserCount = async () => {
     setResetMessage('');
     if (!resetPasscode) {
@@ -300,6 +303,96 @@ export default function GuestGalleryUpload() {
           </p>
 
           <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />
+          
+          <div className="admin-reset" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            gap: '1rem',
+            margin: '2rem 0',
+            padding: '1.5rem',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            transition: 'all 0.3s ease'
+          }}>
+            <h4 style={{ 
+              margin: 0, 
+              color: 'var(--accent)',
+              fontSize: '1.1rem',
+              fontWeight: '600'
+            }}>
+              Admin Reset
+            </h4>
+            <div style={{ 
+              display: 'flex', 
+              gap: '0.5rem', 
+              width: '100%', 
+              maxWidth: '400px',
+              position: 'relative'
+            }}>
+              <input
+                type="password"
+                placeholder="Enter admin passcode"
+                value={resetPasscode}
+                onChange={e => setResetPasscode(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem 1rem',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                  fontSize: '0.95rem',
+                  transition: 'border-color 0.2s ease',
+                  '&:focus': {
+                    borderColor: 'var(--accent)',
+                    outline: 'none',
+                    boxShadow: '0 0 0 2px rgba(244,114,182,0.2)'
+                  }
+                }}
+                aria-label="Admin passcode for reset"
+              />
+              <button
+                onClick={handleResetUserCount}
+                disabled={!resetPasscode}
+                style={{
+                  padding: '0.75rem 1.25rem',
+                  background: resetPasscode ? 'var(--primary)' : '#E5E7EB',
+                  color: resetPasscode ? 'white' : '#9CA3AF',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: resetPasscode ? 'pointer' : 'not-allowed',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: resetPasscode ? 'translateY(-1px)' : 'none',
+                    boxShadow: resetPasscode ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                  }
+                }}
+                aria-label="Reset upload count"
+              >
+                Reset Count
+              </button>
+            </div>
+            {resetMessage && (
+              <p style={{ 
+                margin: '0.5rem 0 0', 
+                color: resetMessage.includes('failed') ? 'var(--error)' : 'var(--success)',
+                fontSize: '0.95rem',
+                fontWeight: '500',
+                textAlign: 'center',
+                padding: '0.5rem',
+                borderRadius: '4px',
+                background: resetMessage.includes('failed') 
+                  ? 'rgba(185,28,28,0.1)' 
+                  : 'rgba(16,185,129,0.1)',
+                width: '100%',
+                maxWidth: '400px'
+              }}>
+                {resetMessage}
+              </p>
+            )}
+          </div>
 
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', textAlign: 'center' }}>
             Your Uploaded Photos
