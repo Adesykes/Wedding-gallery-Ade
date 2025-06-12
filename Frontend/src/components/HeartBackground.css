@@ -2,7 +2,7 @@
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   overflow: hidden;
   background: radial-gradient(circle at 50% 50%, 
     rgba(255, 182, 193, 0.05) 0%,
@@ -18,8 +18,9 @@
   height: 32px;
   background: url('data:image/svg+xml;utf8,<svg fill="%23FFB6C1" viewBox="0 0 32 29.6" xmlns="http://www.w3.org/2000/svg"><path d="M23.6,0c-2.6,0-5,1.3-6.6,3.3C15.4,1.3,13,0,10.4,0C4.7,0,0,4.7,0,10.4c0,7.1,10.7,15.2,15.1,18.6c0.6,0.5,1.5,0.5,2.1,0 C21.3,25.6,32,17.5,32,10.4C32,4.7,27.3,0,23.6,0z"/></svg>') no-repeat center/contain;
   filter: drop-shadow(0 0 5px rgba(255, 182, 193, 0.3));
-  opacity: 0;
+  opacity: 0.8;
   animation: floatHeart linear infinite;
+  z-index: 2;
   will-change: transform, opacity;
 }
 
