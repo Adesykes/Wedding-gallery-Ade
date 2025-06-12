@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 
 function AdminDashboard({ onLogout }) {
+  const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -72,6 +74,25 @@ function AdminDashboard({ onLogout }) {
         }}
       >
         Logout
+      </button>
+
+      <button
+        onClick={() => navigate('/')}
+        style={{
+          marginBottom: 20,
+          backgroundColor: '#9CAF88',
+          color: 'white',
+          border: 'none',
+          padding: '10px 15px',
+          cursor: 'pointer',
+          borderRadius: 6,
+          display: 'block',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          fontWeight: 'bold',
+        }}
+      >
+        Back to Welcome
       </button>
 
       {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
