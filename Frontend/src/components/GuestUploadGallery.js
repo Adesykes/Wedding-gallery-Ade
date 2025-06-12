@@ -220,14 +220,12 @@ export default function GuestGalleryUpload() {
           </p>
         </section>
 
-        <div className="upload-container">
-          <p style={{ textAlign: 'center', marginBottom: 10 }}>
-            You can upload up to {MAX_UPLOADS} photos per device.
-          </p>
-          <p style={{ 
-            textAlign: 'center', 
-            marginBottom: 25, 
-            fontWeight: 'bold', 
+        <div className="upload-container">          <div style={{ width: '100%', textAlign: 'center', marginBottom: '2rem' }}>
+            <p style={{ marginBottom: '0.5rem' }}>
+              You can upload up to {MAX_UPLOADS} photos per device.
+            </p>
+            <p style={{ 
+              fontWeight: 'bold',
             color: uploadsLeft === 0 ? 'var(--error)' : 'var(--accent)' 
           }}>
             Uploads left: {uploadsLeft > 0 ? uploadsLeft : 0}
