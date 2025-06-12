@@ -183,6 +183,7 @@ export default function GuestGalleryUpload() {
         setUploadedCount(0);
         setUploadedCountState(0);
         setResetMessage('Your upload count has been reset!');
+        setResetPasscode(''); // Clear passcode input on success
       } else {
         setResetMessage(data.error || 'Reset failed');
       }

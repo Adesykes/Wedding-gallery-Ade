@@ -41,6 +41,7 @@ export default function AdminPanel() {
     const data = await res.json();
     if (res.ok) {
       setResetMessage(data.message || 'User count reset!');
+      setResetPasscode(''); // Clear passcode input on success
     } else {
       setResetMessage(data.error || 'Reset failed');
     }
