@@ -24,12 +24,13 @@
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-top: 1.5rem;
 }
 
 .welcome-title {
   font-family: 'Playfair Display', 'Lucida Handwriting', cursive;
   font-size: clamp(2.5rem, 8vw, 4.5rem);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0;
   background: linear-gradient(135deg, var(--rose-gold), var(--gold));
   -webkit-background-clip: text;
   background-clip: text;
@@ -42,7 +43,8 @@
   font-family: 'Playfair Display', 'Lucida Handwriting', cursive;
   font-size: clamp(1.2rem, 4vw, 2rem);
   color: var(--primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+  margin-top: -0.5rem;
   opacity: 0.9;
   animation: dateFloat 6s ease-in-out infinite 0.5s;
 }
@@ -51,7 +53,7 @@
   font-size: clamp(1.1rem, 3vw, 1.3rem);
   color: var(--text);
   max-width: 600px;
-  margin: 0 auto 1.5rem;
+  margin: -0.5rem auto 1rem;
   line-height: 1.6;
   text-align: center;
   animation: fadeIn 1s ease-out;
@@ -358,7 +360,7 @@
     padding: 2rem 1rem;
     min-height: 100dvh;
     justify-content: flex-start;
-    padding-top: 4rem;
+    padding-top: 2rem;
   }
 
   .welcome-message {
