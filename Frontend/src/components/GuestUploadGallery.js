@@ -193,6 +193,22 @@ export default function GuestGalleryUpload() {
     }
   };
 
+  useEffect(() => {
+    const container = document.querySelector('.upload-container');
+    
+    const handleMouseMove = (e) => {
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / container.clientWidth) * 100;
+      const y = ((e.clientY - rect.top) / container.clientHeight) * 100;
+      container.style.setProperty('--mouse-x', `${x}%`);
+      container.style.setProperty('--mouse-y', `${y}%`);
+    };
+
+    container?.addEventListener('mousemove', handleMouseMove);
+    return () => container?.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <PageWrapper>
       <div className="guest-upload-gallery">

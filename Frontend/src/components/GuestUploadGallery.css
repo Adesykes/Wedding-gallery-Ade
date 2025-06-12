@@ -1,25 +1,60 @@
 .guest-upload-gallery {
-  --primary: #D946EF;
-  --accent: #F472B6;
-  --lavender: #C084FC;
-  --background: #FFF1F5;
-  --text: #4B0082;
-  --error: #B91C1C;
-  --border: #FBCFE8;
+  --primary: #C8B6FF;
+  --accent: #FFB6C1;
+  --lavender: #E6E6FA;
+  --background: #FFF5F5;
+  --text: #4A4E69;
+  --error: #FF6B6B;
+  --border: #FFE4E6;
   --success: #9CAF88;
+  --gold: #FFD700;
+  --rose-gold: #B76E79;
+  min-height: 100vh;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(200, 182, 255, 0.1) 0%, transparent 50%),
+    var(--background);
 }
 
 .hero-section {
-  background: linear-gradient(180deg, #FDF6F9 0%, var(--background) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, var(--background) 100%);
   padding: 4rem 1rem 3rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  border-bottom: 1px solid rgba(200, 182, 255, 0.2);
+}
+
+.hero-section::before,
+.hero-section::after {
+  content: '';
+  position: absolute;
+  width: 20vw;
+  height: 20vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  opacity: 0.1;
+  animation: float 8s infinite ease-in-out;
+}
+
+.hero-section::before {
+  top: -10vw;
+  left: -10vw;
+  animation-delay: -4s;
+}
+
+.hero-section::after {
+  bottom: -10vw;
+  right: -10vw;
 }
 
 .hero-title {
-  font-family: 'Lucida Handwriting', cursive;
-  font-size: 3.5rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  background: linear-gradient(135deg, var(--rose-gold), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
   color: var(--success);
   margin-bottom: 0.2rem;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
@@ -40,10 +75,34 @@
   max-width: 900px;
   margin: 2rem auto;
   padding: 2.5rem;
-  background-color: white;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  box-shadow: 
+    0 12px 40px rgba(0,0,0,0.08),
+    0 0 0 1px rgba(200, 182, 255, 0.1),
+    inset 0 0 80px rgba(255, 255, 255, 0.5);
   animation: fadeIn 0.6s ease-out;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(200, 182, 255, 0.1) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.upload-container:hover::before {
+  opacity: 1;
 }
 
 .upload-options {
@@ -70,17 +129,40 @@
 .upload-button.primary {
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-button.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.upload-button.primary:hover::before {
+  left: 100%;
 }
 
 .upload-button.secondary {
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
   color: var(--primary);
   border: 2px solid var(--primary);
+  backdrop-filter: blur(5px);
 }
 
 .upload-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(217, 70, 239, 0.2);
+  box-shadow: 0 4px 20px rgba(200, 182, 255, 0.3);
 }
 
 .upload-button:disabled {
@@ -90,9 +172,10 @@
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1.5rem;
   margin: 1.5rem 0;
+  padding: 0.5rem;
 }
 
 .preview-item {
@@ -100,18 +183,31 @@
   aspect-ratio: 1;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
+  box-shadow: 
+    0 8px 20px rgba(0,0,0,0.1),
+    0 0 0 1px rgba(200, 182, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0) scale(1);
+  filter: brightness(1) contrast(1);
 }
 
 .preview-item:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 
+    0 15px 30px rgba(0,0,0,0.15),
+    0 0 0 2px rgba(200, 182, 255, 0.3);
+  filter: brightness(1.1) contrast(1.1);
 }
 
 .preview-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preview-item:hover img {
+  transform: scale(1.1);
 }
 
 .remove-button {
@@ -136,12 +232,14 @@
 
 .gallery-scroll {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   overflow-x: auto;
-  padding: 1rem;
+  padding: 2rem 1rem;
   scroll-snap-type: x mandatory;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--background);
+  position: relative;
+  perspective: 1000px;
 }
 
 .gallery-scroll::-webkit-scrollbar {
@@ -161,17 +259,43 @@
 .gallery-item {
   scroll-snap-align: start;
   flex: 0 0 auto;
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
+  transform: perspective(1000px) rotateY(0deg);
+  transform-style: preserve-3d;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+}
+
+.gallery-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.2) 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 60%,
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s;
 }
 
 .gallery-item:hover {
-  transform: scale(1.05);
+  transform: perspective(1000px) rotateY(5deg) translateY(-5px);
+  box-shadow: 
+    0 15px 35px rgba(0,0,0,0.2),
+    0 0 20px rgba(200, 182, 255, 0.2);
+}
+
+.gallery-item:hover::before {
+  transform: translateX(100%);
 }
 
 .gallery-item img {
@@ -183,12 +307,13 @@
 .lightbox {
   position: fixed;
   inset: 0;
-  background-color: rgba(0,0,0,0.9);
+  background: radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   opacity: 0;
+  backdrop-filter: blur(10px);
   animation: fadeIn 0.3s ease forwards;
 }
 
@@ -216,41 +341,77 @@
   opacity: 1;
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-30px) scale(0.95);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px) scale(0.95);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
 /* Loading animation */
 .loading-shimmer {
-  background: linear-gradient(90deg, #f9e6f0 25%, #f3dce7 50%, #f9e6f0 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(200, 182, 255, 0.05) 0%,
+    rgba(255, 182, 193, 0.1) 25%,
+    rgba(200, 182, 255, 0.05) 50%,
+    rgba(255, 182, 193, 0.1) 75%,
+    rgba(200, 182, 255, 0.05) 100%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite linear;
+  animation: shimmer 2s infinite ease-in-out;
+  border: 1px solid rgba(200, 182, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 20px rgba(0,0,0,0.05),
+    inset 0 0 20px rgba(255,255,255,0.5);
 }
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
