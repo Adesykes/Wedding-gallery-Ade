@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/PageWrapper';
 import imageCompression from 'browser-image-compression';
+import './GuestUploadGallery.css';
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 
 const MAX_UPLOADS = 30;
@@ -194,81 +195,31 @@ export default function GuestGalleryUpload() {
 
   return (
     <PageWrapper>
-      <style>
-        {`@keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }`}
-      </style>
-
-      <div style={{
-        fontFamily: "'Poppins', sans-serif",
-        background: 'linear-gradient(135deg, #FFF1F5, #FDF6F9)',
-        paddingBottom: '4rem',
-      }}>
-        {/* Hero Section */}
-        <section style={{
-          textAlign: 'center',
-          padding: '3rem 1rem 1rem',
-          background: '#FDF6F9',
-        }}>
-          <h1 style={{
-            fontFamily: '"Lucida Handwriting", cursive',
-            fontSize: '3rem',
-            color: '#9CAF88',
-            marginBottom: '0.2rem',
-          }}>
-            Jamie & Leanne
-          </h1>
-          <span style={{
-            fontFamily: '"Lucida Handwriting", cursive',
-            fontSize: '1.5rem',
-            color: '#9CAF88',
-          }}>
-            22nd August 2025
-          </span>
-          <p style={{
-            fontSize: '1.2rem',
-            color: colors.text,
-            maxWidth: 600,
-            margin: '0 auto',
-          }}>
+      <div className="guest-upload-gallery">
+        <section className="hero-section">
+          <h1 className="hero-title">Jamie & Leanne</h1>
+          <span className="hero-date">22nd August 2025</span>
+          <p className="welcome-text">
             Welcome to our wedding photo gallery — share your favorite memories with us!
           </p>
         </section>
 
-        <div style={{
-          maxWidth: 900,
-          margin: '2rem auto',
-          padding: 40,
-          backgroundColor: colors.background,
-          borderRadius: 24,
-          boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
-        }}>
+        <div className="upload-container">
           <p style={{ textAlign: 'center', marginBottom: 10 }}>
             You can upload up to {MAX_UPLOADS} photos per device.
           </p>
-          <p style={{ textAlign: 'center', marginBottom: 25, fontWeight: 'bold', color: uploadsLeft === 0 ? colors.error : colors.accent }}>
+          <p style={{ 
+            textAlign: 'center', 
+            marginBottom: 25, 
+            fontWeight: 'bold', 
+            color: uploadsLeft === 0 ? 'var(--error)' : 'var(--accent)' 
+          }}>
             Uploads left: {uploadsLeft > 0 ? uploadsLeft : 0}
           </p>
 
-          {/* Two upload options: Take Photo or Choose from Gallery */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 25, justifyContent: 'center' }}>
-            {/* Take Photo */}
-            <label style={{
-              flex: 1,
-              background: colors.primary,
-              color: 'white',
-              padding: '12px 0',
-              borderRadius: 8,
-              textAlign: 'center',
-              fontWeight: 'bold',
-              cursor: uploading || uploadsLeft <= 0 ? 'not-allowed' : 'pointer',
-              opacity: uploading || uploadsLeft <= 0 ? 0.6 : 1,
-              border: 'none',
-              fontSize: 16,
-            }}>
-              📷 Take Photo
+          <div className="upload-options">
+            <label className="upload-button primary">
+              <span>📷 Take Photo</span>
               <input
                 type="file"
                 accept="image/*"
@@ -278,24 +229,13 @@ export default function GuestGalleryUpload() {
                 style={{ display: 'none' }}
               />
             </label>
-            {/* Choose from Gallery */}
-            <label style={{
-              flex: 1,
-              background: '#fff',
-              color: colors.primary,
-              padding: '12px 0',
-              borderRadius: 8,
-              textAlign: 'center',
-              fontWeight: 'bold',
-              cursor: uploading || uploadsLeft <= 0 ? 'not-allowed' : 'pointer',
-              opacity: uploading || uploadsLeft <= 0 ? 0.6 : 1,
-              border: `2px solid ${colors.primary}`,
-              fontSize: 16,
-            }}>
-              🖼️ Choose from Gallery
+
+            <label className="upload-button secondary">
+              <span>🖼️ Choose from Gallery</span>
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 disabled={uploading || uploadsLeft <= 0}
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
@@ -304,66 +244,23 @@ export default function GuestGalleryUpload() {
           </div>
 
           {selectedFiles.length > 0 && (
-            <div style={{
-              marginBottom: 25,
-              padding: 20,
-              backgroundColor: '#fff',
-              borderRadius: 10,
-              border: `1px solid ${colors.border}`,
-            }}>
-              <strong style={{ color: colors.accent }}>Files ready to upload:</strong>
-              <div style={{
-                display: 'flex',
-                gap: 12,
-                marginTop: 12,
-                overflowX: 'auto',
-                paddingBottom: 10,
-              }}>
+            <div className="preview-section">
+              <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>
+              <div className="preview-grid">
                 {selectedFiles.map((file, i) => (
-                  <div key={i} style={{
-                    position: 'relative',
-                    minWidth: 90,
-                    maxWidth: 90,
-                    flex: '0 0 auto',
-                    textAlign: 'center',
-                  }}>
+                  <div key={i} className="preview-item">
                     <img
-                      src={file.preview || URL.createObjectURL(file)}
+                      src={file.preview}
                       alt={file.name}
-                      onClick={() => setPreviewImage(file.preview || URL.createObjectURL(file))}
-                      style={{
-                        width: '100%',
-                        height: 90,
-                        objectFit: 'cover',
-                        borderRadius: 8,
-                        border: '1px solid #F3D1DC',
-                        cursor: 'pointer',
-                      }}
+                      onClick={() => setPreviewImage(file.preview)}
                     />
-                    <button onClick={() => removeFile(i)} style={{
-                      position: 'absolute',
-                      top: -6,
-                      right: -6,
-                      backgroundColor: '#B91C1C',
-                      border: 'none',
-                      color: 'white',
-                      borderRadius: '50%',
-                      width: 20,
-                      height: 20,
-                      fontSize: 12,
-                      cursor: 'pointer',
-                    }}>
+                    <button
+                      onClick={() => removeFile(i)}
+                      className="remove-button"
+                      aria-label="Remove photo"
+                    >
                       ×
                     </button>
-                    <small style={{
-                      fontSize: 10,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      display: 'block',
-                    }}>
-                      {file.name}
-                    </small>
                   </div>
                 ))}
               </div>
@@ -371,142 +268,70 @@ export default function GuestGalleryUpload() {
               <button
                 onClick={handleUpload}
                 disabled={uploading}
-                style={{
-                  marginTop: 20,
-                  padding: '12px 0',
-                  width: '100%',
-                  backgroundColor: colors.primary,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontWeight: 'bold',
-                  fontSize: 16,
-                  cursor: uploading ? 'not-allowed' : 'pointer',
-                }}
+                className="upload-button primary"
+                style={{ width: '100%', marginTop: '1rem' }}
               >
-                {uploading ? 'Uploading...' : '📷 Upload Memories'}
+                {uploading ? 'Uploading...' : '📤 Upload Memories'}
               </button>
             </div>
           )}
 
           {error && (
-            <p style={{ color: colors.error, marginBottom: 20, textAlign: 'center', fontWeight: 600 }}>
+            <p style={{ color: 'var(--error)', marginTop: '1rem', textAlign: 'center', fontWeight: 600 }}>
               {error}
             </p>
           )}
 
-          <p style={{ color: '#888', fontSize: 13, textAlign: 'center' }}>
+          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>
             Photos will be resized to a maximum of 12 megapixels for faster uploads.
           </p>
 
-          <hr style={{ border: 'none', borderTop: '1px dashed #F3D1DC', margin: '40px 0' }} />
+          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />
 
-          <h3 style={{ marginBottom: 20, color: colors.accent, textAlign: 'center' }}>
-            Uploaded Photos
+          <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', textAlign: 'center' }}>
+            Your Uploaded Photos
           </h3>
 
-          <div
-            style={{
-              display: 'flex',
-              overflowX: 'auto',
-              gap: 16,
-              padding: 8,
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#9CAF88 #FDF6F9',
-              background: '#fff',
-              borderRadius: 20,
-              marginBottom: 24,
-            }}
-          >
+          <div className="gallery-scroll">
             {loadingPhotos
-              ? Array.from({ length: 6 }).map((_, idx) => <PlaceholderCard key={idx} />)
+              ? Array.from({ length: 6 }).map((_, idx) => (
+                  <div key={idx} className="gallery-item loading-shimmer" />
+                ))
               : photos.length > 0
                 ? photos
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .map((photo) => (
-                    <img
-                      key={photo._id}
-                      src={photo.url}
-                      alt="Wedding upload"
-                      style={{
-                        width: 150,
-                        height: 150,
-                        objectFit: 'cover',
-                        borderRadius: 16,
-                        cursor: 'pointer',
-                        border: `2px solid ${colors.border}`,
-                        flex: '0 0 auto',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}
-                      onClick={() => setPreviewImage(photo.url)}
-                      loading="lazy"
-                    />
-                  ))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .map((photo) => (
+                      <div key={photo._id} className="gallery-item">
+                        <img
+                          src={photo.url}
+                          alt="Wedding upload"
+                          onClick={() => setPreviewImage(photo.url)}
+                        />
+                      </div>
+                    ))
                 : <p style={{ color: '#aaa', margin: 'auto' }}>
                     No photos uploaded yet.
                   </p>
             }
           </div>
+        </div>
 
-          {/* Lightbox */}
-          {previewImage && (
-            <div
-              onClick={() => setPreviewImage(null)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                cursor: 'zoom-out',
-                zIndex: 1000,
-              }}
-            >
-              <img
-                src={previewImage}
-                alt="Preview"
-                style={{ maxHeight: '90%', maxWidth: '90%', borderRadius: 20 }}
-                onClick={e => e.stopPropagation()}
-              />
-              <button
-                onClick={() => setPreviewImage(null)}
-                style={{
-                  position: 'absolute',
-                  top: 20,
-                  right: 20,
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: 36,
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                }}
-              >
-                ×
-              </button>
-            </div>
-          )}
-
-          <div style={{ margin: '32px 0', textAlign: 'center' }}>
-            <h3 style={{ color: colors.primary }}>Reset Upload Count</h3>
-            <input
-              type="password"
-              placeholder="Admin passcode"
-              value={resetPasscode}
-              onChange={e => setResetPasscode(e.target.value)}
-              style={{ padding: 8, borderRadius: 6, border: `1px solid ${colors.border}`, marginRight: 8 }}
+        {previewImage && (
+          <div className="lightbox" onClick={() => setPreviewImage(null)}>
+            <img
+              src={previewImage}
+              alt="Preview"
+              onClick={e => e.stopPropagation()}
             />
             <button
-              onClick={handleResetUserCount}
-              style={{ padding: '8px 16px', borderRadius: 6, background: colors.primary, color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+              className="close-button"
+              onClick={() => setPreviewImage(null)}
+              aria-label="Close preview"
             >
-              Reset My Upload Count
+              ×
             </button>
-            {resetMessage && <div style={{ marginTop: 10, color: resetMessage.includes('fail') ? colors.error : colors.accent }}>{resetMessage}</div>}
           </div>
-        </div>
+        )}
       </div>
     </PageWrapper>
   );
