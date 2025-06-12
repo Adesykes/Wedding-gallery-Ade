@@ -5,9 +5,9 @@ const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
 
-const uploadRoutes = require('./Routes/upload');
-const photosRoutes = require('./Routes/photos');    // for /api/photos
-const adminRoutes = require('./Routes/admin');      // for /api/admin
+const uploadRoutes = require('./routes/upload');
+const photosRoutes = require('./routes/photos');    // for /api/photos
+const adminRoutes = require('./routes/admin');      // for /api/admin
 
 const app = express();
 
