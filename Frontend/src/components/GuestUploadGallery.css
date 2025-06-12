@@ -262,6 +262,9 @@
   scrollbar-color: var(--accent) var(--background);
   position: relative;
   perspective: 1000px;
+  width: calc(100% + 2rem);
+  margin: 0 -1rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 .gallery-scroll::-webkit-scrollbar {
