@@ -3,10 +3,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
+const axios = require('axios');
 
-const uploadRoutes = require('./routes/upload');
-const photosRoutes = require('./routes/photos');    // for /api/photos
-const adminRoutes = require('./routes/admin');      // for /api/admin
+const uploadRoutes = require('./Routes/upload');
+const photosRoutes = require('./Routes/photos');    // for /api/photos
+const adminRoutes = require('./Routes/admin');      // for /api/admin
 
 const app = express();
 
@@ -30,6 +31,19 @@ app.use((req, res, next) => {
 app.use('/api/upload', uploadRoutes);
 app.use('/api/photos', photosRoutes);
 app.use('/api/admin', adminRoutes);
+
+// --- PING ROUTE ---
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
+// --- SELF-PING INTERVAL ---
+const SELF_PING_URL = 'https://wedding-gallery-ade-backend.onrender.com/ping';
+setInterval(() => {
+  axios.get(SELF_PING_URL)
+    .then(() => console.log(`[Self-ping] Pinged ${SELF_PING_URL}`))
+    .catch((err) => console.error(`[Self-ping] Failed:`, err.message));
+}, 1000 * 60 * 5); // every 5 minutes
 
 // 404 Handler (should be after all other routes)
 app.use((req, res) => {
