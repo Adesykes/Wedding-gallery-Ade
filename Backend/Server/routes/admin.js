@@ -4,7 +4,7 @@ const Photo = require('../models/Photo'); // ✅ Fixed path
 const router = express.Router();
 const JSZip = require('jszip');
 const axios = require('axios');
-const { deleteImageKitFile } = require('../Utils/imagekit');
+const { deleteImageKitFile } = require('../utils/imagekit');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;

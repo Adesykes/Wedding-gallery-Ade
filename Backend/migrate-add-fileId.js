@@ -4,7 +4,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Photo = require('./Server/Models/Photo');
-const { imagekit } = require('./Server/Utils/imagekit');
+const { imagekit } = require('./Server/utils/imagekit');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/wedding-gallery-ade';
 
