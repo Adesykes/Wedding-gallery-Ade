@@ -9,6 +9,7 @@ function AdminDashboard({ onLogout }) {
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
 
   const fetchPhotos = async () => {
     try {
@@ -43,6 +44,25 @@ function AdminDashboard({ onLogout }) {
     }
   };
 
+  const handleDeleteSelected = async () => {
+    if (selectedPhotos.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedPhotos.length} photo(s)?`)) return;
+    try {
+      for (const photoId of selectedPhotos) {
+        await axios.delete(
+          `${API_URL}/api/admin/delete/${photoId}`,
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          }
+        );
+      }
+      setPhotos((prev) => prev.filter((p) => !selectedPhotos.includes(p._id)));
+      setSelectedPhotos([]);
+    } catch (err) {
+      setError('Failed to delete selected photos');
+    }
+  };
+
   const handleDownloadZip = () => {
     const zipUrl = '/api/admin/download-zip';
     window.open(zipUrl, '_blank');
@@ -51,6 +71,14 @@ function AdminDashboard({ onLogout }) {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     if (onLogout) onLogout();
+  };
+
+  const toggleSelectPhoto = (photoId) => {
+    setSelectedPhotos((prev) =>
+      prev.includes(photoId)
+        ? prev.filter((id) => id !== photoId)
+        : [...prev, photoId]
+    );
   };
 
   if (loading) return <p style={{ textAlign: 'center' }}>Loading photos...</p>;
@@ -121,6 +149,27 @@ function AdminDashboard({ onLogout }) {
         Download All Photos (ZIP)
       </button>
 
+      <button
+        onClick={handleDeleteSelected}
+        disabled={selectedPhotos.length === 0}
+        style={{
+          marginBottom: 20,
+          display: 'block',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          padding: '10px 20px',
+          cursor: selectedPhotos.length === 0 ? 'not-allowed' : 'pointer',
+          backgroundColor: selectedPhotos.length === 0 ? '#ccc' : '#d9534f',
+          color: 'white',
+          border: 'none',
+          borderRadius: 6,
+          fontWeight: '600',
+          fontSize: 14,
+        }}
+      >
+        Delete Selected Photos
+      </button>
+
       {photos.length === 0 ? (
         <p style={{ textAlign: 'center' }}>No photos uploaded yet.</p>
       ) : (
@@ -137,20 +186,24 @@ function AdminDashboard({ onLogout }) {
               <div
                 key={photo._id}
                 style={{
-                  border: '1px solid #ccc',
+                  border: selectedPhotos.includes(photo._id) ? '2px solid #d9534f' : '1px solid #ccc',
                   borderRadius: 8,
                   padding: 5,
                   position: 'relative',
                   overflow: 'hidden',
+                  background: selectedPhotos.includes(photo._id) ? '#fff0f0' : 'white',
+                  boxShadow: selectedPhotos.includes(photo._id) ? '0 0 8px #d9534f44' : undefined,
                 }}
+                onClick={() => toggleSelectPhoto(photo._id)}
+                title={selectedPhotos.includes(photo._id) ? 'Deselect' : 'Select'}
               >
                 <img
                   src={photo.url}
                   alt="Uploaded"
-                  style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: 6 }}
+                  style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: 6, cursor: 'pointer' }}
                 />
                 <button
-                  onClick={() => handleDelete(photo._id)}
+                  onClick={e => { e.stopPropagation(); handleDelete(photo._id); }}
                   style={{
                     position: 'absolute',
                     top: 5,
@@ -169,6 +222,23 @@ function AdminDashboard({ onLogout }) {
                 >
                   Delete
                 </button>
+                {selectedPhotos.includes(photo._id) && (
+                  <span style={{
+                    position: 'absolute',
+                    top: 5,
+                    left: 5,
+                    background: '#d9534f',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: 20,
+                    height: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                  }}>✓</span>
+                )}
               </div>
             ))}
         </div>
