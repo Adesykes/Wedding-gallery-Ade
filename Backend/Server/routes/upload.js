@@ -31,6 +31,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
   console.log('Original name:', req.file.originalname);
 
   try {
+    const guestId = req.body.guestId || req.query.guestId || req.headers['x-guest-id'] || '';
     const result = await imagekit.upload({
       file: req.file.buffer,
       fileName: req.file.originalname,
@@ -42,7 +43,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
       url: result.url,
       fileId: result.fileId, // Store ImageKit fileId
       originalName: req.file.originalname,
-      guestId: req.body.guestId || '',
+      guestId: guestId, // Always save guestId
     });
     await photo.save();
 
