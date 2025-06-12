@@ -4,6 +4,7 @@ const Photo = require('../models/Photo'); // ✅ Fixed path
 const router = express.Router();
 const JSZip = require('jszip');
 const axios = require('axios');
+const { deleteImageKitFile } = require('../Utils/imagekit');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -44,9 +45,20 @@ router.get('/photos', verifyToken, async (req, res) => {
 // Delete photo
 router.delete('/delete/:id', verifyToken, async (req, res) => {
   try {
-    const deleted = await Photo.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Photo not found' });
+    const photo = await Photo.findById(req.params.id);
+    if (!photo) return res.status(404).json({ error: 'Photo not found' });
 
+    // Attempt to delete from ImageKit if fileId exists
+    if (photo.fileId) {
+      try {
+        await deleteImageKitFile(photo.fileId);
+      } catch (err) {
+        // Log but don't block DB deletion if ImageKit fails
+        console.error('ImageKit delete error:', err.message);
+      }
+    }
+
+    await Photo.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete photo' });
