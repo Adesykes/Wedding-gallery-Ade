@@ -12,7 +12,9 @@ function AdminDashboard({ onLogout }) {
 
   const fetchPhotos = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/photos`);
+      const res = await axios.get(`${API_URL}/api/admin/photos`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
       setPhotos(res.data);
       setLoading(false);
     } catch (err) {
