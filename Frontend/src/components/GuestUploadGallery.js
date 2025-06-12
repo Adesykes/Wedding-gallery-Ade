@@ -218,15 +218,14 @@ export default function GuestGalleryUpload() {
           <p className="welcome-text">
             Welcome to our wedding photo gallery — share your favorite memories with us!
           </p>
-        </section>
-
-        <div className="upload-container">          <div style={{ width: '100%', textAlign: 'center', marginBottom: '2rem' }}>
-            <p style={{ marginBottom: '0.5rem' }}>
-              You can upload up to {MAX_UPLOADS} photos per device.
-            </p>
-            <p style={{ 
-              fontWeight: 'bold',
-            color: uploadsLeft === 0 ? 'var(--error)' : 'var(--accent)' 
+        </section>        <div className="upload-container">
+          <p style={{ marginBottom: '0.5rem' }}>
+            You can upload up to {MAX_UPLOADS} photos per device.
+          </p>
+          <p style={{ 
+            fontWeight: 'bold',
+            color: uploadsLeft === 0 ? 'var(--error)' : 'var(--accent)',
+            marginBottom: '1.5rem'
           }}>
             Uploads left: {uploadsLeft > 0 ? uploadsLeft : 0}
           </p>
