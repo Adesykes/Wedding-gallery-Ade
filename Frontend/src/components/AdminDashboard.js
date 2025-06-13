@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './AdminDashboard.css';
 
 const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 
@@ -10,6 +11,11 @@ function AdminDashboard({ onLogout }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [stats, setStats] = useState({
+    totalPhotos: 0,
+    totalGuests: 0,
+    totalStorage: '0 MB'
+  });
 
   const fetchPhotos = async () => {
     try {
@@ -17,6 +23,16 @@ function AdminDashboard({ onLogout }) {
         headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
       });
       setPhotos(res.data);
+      
+      // Calculate stats
+      const uniqueGuests = new Set(res.data.map(photo => photo.guestId)).size;
+      const totalSize = res.data.reduce((acc, photo) => acc + (photo.size || 0), 0);
+      setStats({
+        totalPhotos: res.data.length,
+        totalGuests: uniqueGuests,
+        totalStorage: `${(totalSize / (1024 * 1024)).toFixed(2)} MB`
+      });
+      
       setLoading(false);
     } catch (err) {
       setError('Failed to load photos');
@@ -39,6 +55,7 @@ function AdminDashboard({ onLogout }) {
         }
       );
       setPhotos((prev) => prev.filter((p) => p._id !== photoId));
+      setSelectedPhotos((prev) => prev.filter(id => id !== photoId));
     } catch (err) {
       setError('Failed to delete photo');
     }
@@ -47,215 +64,125 @@ function AdminDashboard({ onLogout }) {
   const handleDeleteSelected = async () => {
     if (selectedPhotos.length === 0) return;
     if (!window.confirm(`Are you sure you want to delete ${selectedPhotos.length} photo(s)?`)) return;
+    
     try {
-      for (const photoId of selectedPhotos) {
-        await axios.delete(
-          `${API_URL}/api/admin/delete/${photoId}`,
-          {
+      await Promise.all(
+        selectedPhotos.map(photoId =>
+          axios.delete(`${API_URL}/api/admin/delete/${photoId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
-          }
-        );
-      }
-      setPhotos((prev) => prev.filter((p) => !selectedPhotos.includes(p._id)));
+          })
+        )
+      );
+      
+      setPhotos(prev => prev.filter(p => !selectedPhotos.includes(p._id)));
       setSelectedPhotos([]);
     } catch (err) {
       setError('Failed to delete selected photos');
     }
   };
 
-  const handleDownloadZip = () => {
-    const zipUrl = '/api/admin/download-zip';
-    window.open(zipUrl, '_blank');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    if (onLogout) onLogout();
-  };
-
-  const toggleSelectPhoto = (photoId) => {
-    setSelectedPhotos((prev) =>
+  const handleSelectPhoto = (photoId) => {
+    setSelectedPhotos(prev =>
       prev.includes(photoId)
-        ? prev.filter((id) => id !== photoId)
+        ? prev.filter(id => id !== photoId)
         : [...prev, photoId]
     );
   };
 
-  if (loading) return <p style={{ textAlign: 'center' }}>Loading photos...</p>;
+  const handleSelectAll = () => {
+    if (selectedPhotos.length === photos.length) {
+      setSelectedPhotos([]);
+    } else {
+      setSelectedPhotos(photos.map(p => p._id));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-dashboard">
+        <div className="loading-spinner">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: 900, margin: 'auto', padding: 20, fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Admin Dashboard</h2>
+    <div className="admin-dashboard">
+      <div className="admin-header">
+        <h1 className="admin-title">Wedding Gallery Admin</h1>
+        <div className="admin-controls">
+          <button className="admin-button admin-button-secondary" onClick={onLogout}>
+            Logout
+          </button>
+        </div>
+      </div>
 
-      <button
-        onClick={handleLogout}
-        style={{
-          marginBottom: 20,
-          backgroundColor: '#d9534f',
-          color: 'white',
-          border: 'none',
-          padding: '10px 15px',
-          cursor: 'pointer',
-          borderRadius: 6,
-          display: 'block',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          fontWeight: 'bold',
-        }}
-      >
-        Logout
-      </button>
+      {/* Stats Section */}
+      <div className="stats-container">
+        <div className="stat-card">
+          <div className="stat-title">Total Photos</div>
+          <div className="stat-value">{stats.totalPhotos}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-title">Total Guests</div>
+          <div className="stat-value">{stats.totalGuests}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-title">Storage Used</div>
+          <div className="stat-value">{stats.totalStorage}</div>
+        </div>
+      </div>
 
-      <button
-        onClick={() => navigate('/')}
-        style={{
-          marginBottom: 20,
-          backgroundColor: '#9CAF88',
-          color: 'white',
-          border: 'none',
-          padding: '10px 15px',
-          cursor: 'pointer',
-          borderRadius: 6,
-          display: 'block',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          fontWeight: 'bold',
-        }}
-      >
-        Back to Welcome
-      </button>
+      {error && <div className="error-message">{error}</div>}
 
-      {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-
-      <p style={{ textAlign: 'center', marginBottom: 20, fontWeight: '600' }}>Total Photos: {photos.length}</p>
-
-      <button
-        onClick={handleDownloadZip}
-        style={{
-          marginBottom: 20,
-          display: 'block',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          padding: '10px 20px',
-          cursor: 'pointer',
-          backgroundColor: '#4f46e5',
-          color: 'white',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: '600',
-          fontSize: 14,
-        }}
-      >
-        Download All Photos (ZIP)
-      </button>
-
-      <button
-        onClick={handleDeleteSelected}
-        disabled={selectedPhotos.length === 0}
-        style={{
-          marginBottom: 20,
-          display: 'block',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          padding: '10px 20px',
-          cursor: selectedPhotos.length === 0 ? 'not-allowed' : 'pointer',
-          backgroundColor: selectedPhotos.length === 0 ? '#ccc' : '#d9534f',
-          color: 'white',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: '600',
-          fontSize: 14,
-        }}
-      >
-        Delete Selected Photos
-      </button>
-
-      {photos.length === 0 ? (
-        <p style={{ textAlign: 'center' }}>No photos uploaded yet.</p>
-      ) : (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            gap: 16,
-            padding: '10px 0',
-            marginBottom: 24,
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#d9534f #FDF6F9',
-            background: '#fff',
-            borderRadius: 20,
-          }}
-        >
-          {photos
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .map((photo) => (
-              <div
-                key={photo._id}
-                style={{
-                  minWidth: 180,
-                  maxWidth: 180,
-                  border: selectedPhotos.includes(photo._id) ? '2px solid #d9534f' : '1px solid #ccc',
-                  borderRadius: 8,
-                  padding: 5,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: selectedPhotos.includes(photo._id) ? '#fff0f0' : 'white',
-                  boxShadow: selectedPhotos.includes(photo._id) ? '0 0 8px #d9534f44' : undefined,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-                onClick={() => toggleSelectPhoto(photo._id)}
-                title={selectedPhotos.includes(photo._id) ? 'Deselect' : 'Select'}
-              >
-                <img
-                  src={photo.url}
-                  alt="Uploaded"
-                  style={{ width: 160, height: 160, objectFit: 'cover', borderRadius: 6, marginBottom: 8 }}
-                />
-                <button
-                  onClick={e => { e.stopPropagation(); handleDelete(photo._id); }}
-                  style={{
-                    position: 'absolute',
-                    top: 5,
-                    right: 5,
-                    backgroundColor: '#d9534f',
-                    border: 'none',
-                    color: 'white',
-                    cursor: 'pointer',
-                    padding: '4px 8px',
-                    fontSize: 12,
-                    borderRadius: 4,
-                    fontWeight: 'bold',
-                    userSelect: 'none',
-                  }}
-                  title="Delete photo"
-                >
-                  Delete
-                </button>
-                {selectedPhotos.includes(photo._id) && (
-                  <span style={{
-                    position: 'absolute',
-                    top: 5,
-                    left: 5,
-                    background: '#d9534f',
-                    color: 'white',
-                    borderRadius: '50%',
-                    width: 20,
-                    height: 20,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 'bold',
-                  }}>✓</span>
-                )}
-              </div>
-            ))}
+      {/* Bulk Actions */}
+      {photos.length > 0 && (
+        <div className="bulk-actions">
+          <button 
+            className="admin-button admin-button-secondary"
+            onClick={handleSelectAll}
+          >
+            {selectedPhotos.length === photos.length ? 'Deselect All' : 'Select All'}
+          </button>
+          {selectedPhotos.length > 0 && (
+            <button 
+              className="admin-button admin-button-danger"
+              onClick={handleDeleteSelected}
+            >
+              Delete Selected ({selectedPhotos.length})
+            </button>
+          )}
         </div>
       )}
+
+      {/* Photos Grid */}
+      <div className="photos-grid">
+        {photos.map((photo) => (
+          <div key={photo._id} className="photo-card">
+            <div className="photo-checkbox">
+              <input
+                type="checkbox"
+                checked={selectedPhotos.includes(photo._id)}
+                onChange={() => handleSelectPhoto(photo._id)}
+              />
+            </div>
+            <img src={photo.url} alt="Wedding" />
+            <div className="photo-info">
+              <div className="photo-guest">Guest ID: {photo.guestId}</div>
+              <div className="photo-date">
+                {new Date(photo.uploadDate).toLocaleDateString()}
+              </div>
+            </div>
+            <div className="photo-actions">
+              <button
+                className="admin-button admin-button-danger"
+                onClick={() => handleDelete(photo._id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

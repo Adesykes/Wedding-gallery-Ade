@@ -1,0 +1,226 @@
+/* Modern Admin Dashboard Styles */
+:root {
+  --admin-primary: #4F46E5;
+  --admin-primary-light: #6366F1;
+  --admin-secondary: #9333EA;
+  --admin-success: #10B981;
+  --admin-danger: #EF4444;
+  --admin-warning: #F59E0B;
+  --admin-background: #F3F4F6;
+  --admin-surface: #FFFFFF;
+  --admin-text: #1F2937;
+  --admin-text-light: #6B7280;
+  --admin-border: #E5E7EB;
+  --admin-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard {
+  min-height: 100vh;
+  background: var(--admin-background);
+  padding: 2rem;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: var(--admin-surface);
+  padding: 1.5rem 2rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--admin-shadow);
+}
+
+.admin-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.admin-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.admin-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-button-primary {
+  background: var(--admin-primary);
+  color: white;
+}
+
+.admin-button-primary:hover {
+  background: var(--admin-primary-light);
+}
+
+.admin-button-danger {
+  background: var(--admin-danger);
+  color: white;
+}
+
+.admin-button-danger:hover {
+  filter: brightness(1.1);
+}
+
+.admin-button-secondary {
+  background: white;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-button-secondary:hover {
+  background: var(--admin-background);
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.photo-card {
+  background: var(--admin-surface);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: var(--admin-shadow);
+  transition: transform 0.2s;
+  position: relative;
+}
+
+.photo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.photo-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.photo-info {
+  padding: 1rem;
+}
+
+.photo-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--admin-background);
+  border-top: 1px solid var(--admin-border);
+}
+
+.photo-checkbox {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.photo-checkbox input[type="checkbox"] {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.photo-date {
+  color: var(--admin-text-light);
+  font-size: 0.875rem;
+}
+
+.photo-guest {
+  font-weight: 500;
+  color: var(--admin-text);
+  margin-bottom: 0.5rem;
+}
+
+.bulk-actions {
+  background: var(--admin-surface);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--admin-shadow);
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--admin-surface);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--admin-shadow);
+}
+
+.stat-title {
+  color: var(--admin-text-light);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--admin-danger);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 1rem;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .bulk-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
