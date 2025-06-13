@@ -228,34 +228,80 @@ function AdminDashboard({ onLogout }) {
           orientation: 'portrait',
           unit: 'mm',
           format: 'a4'
-        });        // Add title
-        doc.setFont("times", "italic");
-        doc.setFontSize(24);
-        doc.setTextColor(183, 110, 121); // Return to original #B76E79 color
+        });        // Add title with elegant styling
+        // Define our theme colors
+        const primaryColor = [183, 110, 121]; // Romantic pink/rose - #B76E79
+        const accentColor = [156, 175, 136];  // Sage green - #9CAF88
+        const goldColor = [212, 175, 55];     // Gold - #D4AF37
+        const creamColor = [255, 253, 245];   // Cream - #FFFDF5
+        const darkText = [74, 78, 105];       // Dark blue-gray - #4A4E69
         
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         
-        // Keep the decorative border but remove background
-        doc.setDrawColor(100, 140, 110); // Keep sage green border
-        doc.setLineWidth(0.5);
-        doc.rect(5, 5, pageWidth-10, pageHeight-10, 'S');
+        // Add a cream background to the entire page
+        doc.setFillColor(...creamColor);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
         
-        doc.text('Jamie & Leanne', pageWidth / 2, 20, { align: 'center' });
+        // Add decorative gold corners
+        const cornerSize = 15;
+        const cornerThickness = 1;
+        
+        // Top-left corner
+        doc.setDrawColor(...goldColor);
+        doc.setLineWidth(cornerThickness);
+        doc.line(5, 5, 5 + cornerSize, 5); // Horizontal line
+        doc.line(5, 5, 5, 5 + cornerSize); // Vertical line
+        
+        // Top-right corner
+        doc.line(pageWidth - 5, 5, pageWidth - 5 - cornerSize, 5); // Horizontal line
+        doc.line(pageWidth - 5, 5, pageWidth - 5, 5 + cornerSize); // Vertical line
+        
+        // Bottom-left corner
+        doc.line(5, pageHeight - 5, 5 + cornerSize, pageHeight - 5); // Horizontal line
+        doc.line(5, pageHeight - 5, 5, pageHeight - 5 - cornerSize); // Vertical line
+        
+        // Bottom-right corner
+        doc.line(pageWidth - 5, pageHeight - 5, pageWidth - 5 - cornerSize, pageHeight - 5); // Horizontal line
+        doc.line(pageWidth - 5, pageHeight - 5, pageWidth - 5, pageHeight - 5 - cornerSize); // Vertical line
+        
+        // Add decorative header background
+        doc.setFillColor(255, 255, 255, 0.8); // Semi-transparent white
+        doc.roundedRect(10, 8, pageWidth - 20, 40, 3, 3, 'F');
+        
+        // Add decorative border around the header
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(0.8);
+        doc.roundedRect(10, 8, pageWidth - 20, 40, 3, 3, 'S');
+        
+        // Add second decorative border with gold
+        doc.setDrawColor(...goldColor);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(12, 10, pageWidth - 24, 36, 2, 2, 'S');
+        
+        // Add title
+        doc.setFont("times", "italic");
+        doc.setFontSize(28);
+        doc.setTextColor(...primaryColor);
+        doc.text('Jamie & Leanne', pageWidth / 2, 25, { align: 'center' });
         
         doc.setFontSize(16);
-        doc.text('Wedding Guestbook', pageWidth / 2, 30, { align: 'center' });
+        doc.setTextColor(...accentColor);
+        doc.text('Wedding Guestbook', pageWidth / 2, 35, { align: 'center' });
+        
+        doc.setFont("times", "normal");
         doc.setFontSize(12);
-        doc.text('22nd August 2025', pageWidth / 2, 38, { align: 'center' });        // Style for header row
+        doc.setTextColor(...darkText);
+        doc.text('22nd August 2025', pageWidth / 2, 43, { align: 'center' });        // Style for header row with our theme colors
         const tableHeaderStyle = {
-          fillColor: [183, 110, 121], // Return to original #B76E79 color
+          fillColor: primaryColor, // Romantic pink/rose
           textColor: [255, 255, 255], // White text
           fontStyle: 'bold',
           halign: 'center',
           cellPadding: 8,
           fontSize: 12,
           lineWidth: 0.5,
-          lineColor: [100, 140, 110] // Keep sage green border
+          lineColor: goldColor // Gold border
         };
         
         // Prepare data for table, ensuring all fields exist and handling null values
@@ -265,7 +311,7 @@ function AdminDashboard({ onLogout }) {
           wish && wish.createdAt ? formatDate(wish.createdAt) : ''
         ]);
         
-        console.log("Table data prepared:", tableData.length);        // Create wish entries table
+        console.log("Table data prepared:", tableData.length);        // Create wish entries table with beautiful styling
         doc.autoTable({
           startY: 55,
           head: [['Name', 'Message', 'Date']],
@@ -276,66 +322,137 @@ function AdminDashboard({ onLogout }) {
             cellWidth: 'wrap',
             fontSize: 9,
             cellPadding: 5,
-            lineColor: [100, 140, 110], // Keep sage green border
-            lineWidth: 0.5
+            lineColor: accentColor, // Sage green border
+            lineWidth: 0.5,
+            font: "times"
           },
           columnStyles: {
             0: { 
               cellWidth: 40,
               fontStyle: 'bold',
-              textColor: [0, 0, 0] // Return to black text
+              textColor: primaryColor, // Pink for names
+              fontSize: 10
             },
             1: { 
               cellWidth: 'auto',
               fontSize: 10,
               fontStyle: 'normal',
               cellPadding: 6,
-              textColor: [0, 0, 0] // Return to black text
+              textColor: darkText // Dark blue-gray for message text
             },
             2: { 
               cellWidth: 40,
               fontStyle: 'italic',
               fontSize: 8,
-              textColor: [0, 0, 0] // Return to black text
+              textColor: [100, 100, 100] // Gray for dates
             }
           },
           alternateRowStyles: {
-            fillColor: [255, 255, 255] // Return to white background
+            fillColor: [248, 246, 240] // Very light cream for alternate rows
           },
           margin: { top: 50, left: 15, right: 15 },
           didParseCell: function(data) {
-            // Keep only the sage green border
+            // Enhanced cell styling
             if (data.section === 'body') {
-              data.cell.styles.lineColor = [100, 140, 110]; // Keep sage green border
+              // Add elegant borders
+              data.cell.styles.lineColor = accentColor; // Sage green border
               
-              // Set text colors back to original
+              // Special styling for different columns
               if (data.column.index === 0) {
                 data.cell.styles.fontStyle = 'bold';
-                data.cell.styles.textColor = [0, 0, 0]; // Black for names
+                data.cell.styles.textColor = primaryColor; // Pink for names
+              }
+              
+              // Add a subtle background color to every cell
+              if (data.row.index % 2 === 0) {
+                data.cell.styles.fillColor = [255, 255, 255]; // White
+              } else {
+                data.cell.styles.fillColor = [248, 246, 240]; // Very light cream
+              }
+              
+              // Add special styling to first and last rows
+              if (data.row.index === 0) {
+                data.cell.styles.lineWidth = 0.75;
+                data.cell.styles.lineColor = goldColor; // Gold for first row
+              } else if (data.row.index === tableData.length - 1) {
+                data.cell.styles.lineWidth = 0.75;
               }
             }
           },
           didDrawPage: (data) => {
-            // Add page number at the bottom
+            // Add decorative footer to each page
+            // Golden line above page number
+            doc.setDrawColor(...goldColor);
+            doc.setLineWidth(0.5);
+            doc.line(pageWidth/4, pageHeight - 15, pageWidth*3/4, pageHeight - 15);
+            
+            // Add page number with enhanced styling
+            doc.setFont("times", "italic");
             doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100); // Gray for page numbers
+            doc.setTextColor(...darkText);
             doc.text(
               `Page ${data.pageNumber} of ${data.pageCount}`,
               pageWidth / 2, 
               pageHeight - 10, 
               { align: 'center' }
             );
+            
+            // Re-draw corner decorations on each page
+            // Top-left corner
+            doc.setDrawColor(...goldColor);
+            doc.setLineWidth(cornerThickness);
+            doc.line(5, 5, 5 + cornerSize, 5);
+            doc.line(5, 5, 5, 5 + cornerSize);
+            
+            // Top-right corner
+            doc.line(pageWidth - 5, 5, pageWidth - 5 - cornerSize, 5);
+            doc.line(pageWidth - 5, 5, pageWidth - 5, 5 + cornerSize);
+            
+            // Bottom-left corner
+            doc.line(5, pageHeight - 5, 5 + cornerSize, pageHeight - 5);
+            doc.line(5, pageHeight - 5, 5, pageHeight - 5 - cornerSize);
+            
+            // Bottom-right corner
+            doc.line(pageWidth - 5, pageHeight - 5, pageWidth - 5 - cornerSize, pageHeight - 5);
+            doc.line(pageWidth - 5, pageHeight - 5, pageWidth - 5, pageHeight - 5 - cornerSize);
           }
-        });        // Add footer with total count
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100); // Return to original gray
+        });        // Add enhanced footer with total count
+        // Add decorative elements to the footer
+        const lastPage = doc.getNumberOfPages();
+        doc.setPage(lastPage);
+        
+        // Add decorative footer area with subtle background
+        doc.setFillColor(248, 246, 240); // Very light cream
+        doc.roundedRect(pageWidth/4 - 20, pageHeight - 25, pageWidth/2 + 40, 20, 3, 3, 'F');
+        
+        // Add gold border around footer
+        doc.setDrawColor(...goldColor);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(pageWidth/4 - 20, pageHeight - 25, pageWidth/2 + 40, 20, 3, 3, 'S');
+        
+        // Add total count with enhanced styling
+        doc.setFont("times", "italic");
+        doc.setFontSize(11);
+        doc.setTextColor(...primaryColor); // Rose color for total count
         doc.text(
-          `Total messages: ${allWishes.length}`,
+          `Total Messages: ${allWishes.length}`,
           pageWidth / 2,
-          pageHeight - 10,
+          pageHeight - 15,
           { align: 'center' }
         );
+        
+        // Add decorative flourish
+        const flourishWidth = 15;
+        doc.setDrawColor(...goldColor);
+        doc.setLineWidth(0.3);
+        
+        // Left flourish
+        doc.line(pageWidth/2 - 70, pageHeight - 15, pageWidth/2 - 50, pageHeight - 15);
+        doc.line(pageWidth/2 - 45, pageHeight - 15, pageWidth/2 - 25, pageHeight - 15);
+        
+        // Right flourish
+        doc.line(pageWidth/2 + 25, pageHeight - 15, pageWidth/2 + 45, pageHeight - 15);
+        doc.line(pageWidth/2 + 50, pageHeight - 15, pageWidth/2 + 70, pageHeight - 15);
         
         console.log("PDF generated successfully, saving...");
         
