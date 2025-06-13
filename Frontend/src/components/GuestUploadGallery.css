@@ -140,10 +140,10 @@
 }
 
 .upload-button {
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
@@ -151,15 +151,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  width: 220px;
-  min-width: 180px;
-  max-width: 220px;
+  width: 110px;
+  min-width: 90px;
+  max-width: 110px;
   flex: 0 0 auto;
-  width: 100%; /* Full width on mobile */
-  max-width: none;
-  min-height: 3.5rem; /* Taller touch target */
-  padding: 0.875rem;
-  font-size: max(16px, 0.95rem); /* Ensure readable text size */
+  min-height: 2.5rem;
   touch-action: manipulation;
 }
 
@@ -663,8 +659,8 @@
   }
 
   .upload-button {
-    width: 220px;
-    max-width: 220px;
+    width: 110px;
+    max-width: 110px;
   }
 
   .preview-grid {
