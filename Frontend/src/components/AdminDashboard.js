@@ -228,21 +228,16 @@ function AdminDashboard({ onLogout }) {
           orientation: 'portrait',
           unit: 'mm',
           format: 'a4'
-        });
-          // Add title
+        });        // Add title
         doc.setFont("times", "italic");
         doc.setFontSize(24);
-        doc.setTextColor(100, 140, 110); // Sage green for title
+        doc.setTextColor(183, 110, 121); // Return to original #B76E79 color
         
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         
-        // Add a light sage green background for the header
-        doc.setFillColor(240, 248, 240); // Very light sage green
-        doc.rect(0, 0, pageWidth, 50, 'F');
-        
-        // Add a decorative border
-        doc.setDrawColor(100, 140, 110); // Sage green border
+        // Keep the decorative border but remove background
+        doc.setDrawColor(100, 140, 110); // Keep sage green border
         doc.setLineWidth(0.5);
         doc.rect(5, 5, pageWidth-10, pageHeight-10, 'S');
         
@@ -251,23 +246,16 @@ function AdminDashboard({ onLogout }) {
         doc.setFontSize(16);
         doc.text('Wedding Guestbook', pageWidth / 2, 30, { align: 'center' });
         doc.setFontSize(12);
-        doc.text('22nd August 2025', pageWidth / 2, 38, { align: 'center' });
-        
-        // Add date
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 45, { align: 'center' });
-          // Style for header row
+        doc.text('22nd August 2025', pageWidth / 2, 38, { align: 'center' });        // Style for header row
         const tableHeaderStyle = {
-          fillColor: [100, 140, 110], // Sage green header
+          fillColor: [183, 110, 121], // Return to original #B76E79 color
           textColor: [255, 255, 255], // White text
           fontStyle: 'bold',
           halign: 'center',
           cellPadding: 8,
           fontSize: 12,
           lineWidth: 0.5,
-          lineColor: [80, 120, 90] // Slightly darker sage for header border
+          lineColor: [100, 140, 110] // Keep sage green border
         };
         
         // Prepare data for table, ensuring all fields exist and handling null values
@@ -277,8 +265,7 @@ function AdminDashboard({ onLogout }) {
           wish && wish.createdAt ? formatDate(wish.createdAt) : ''
         ]);
         
-        console.log("Table data prepared:", tableData.length);
-          // Create wish entries table
+        console.log("Table data prepared:", tableData.length);        // Create wish entries table
         doc.autoTable({
           startY: 55,
           head: [['Name', 'Message', 'Date']],
@@ -289,50 +276,49 @@ function AdminDashboard({ onLogout }) {
             cellWidth: 'wrap',
             fontSize: 9,
             cellPadding: 5,
-            lineColor: [100, 140, 110], // Sage green color for borders
+            lineColor: [100, 140, 110], // Keep sage green border
             lineWidth: 0.5
           },
           columnStyles: {
             0: { 
               cellWidth: 40,
-              fontStyle: 'bold'
-            },  // Name column
+              fontStyle: 'bold',
+              textColor: [0, 0, 0] // Return to black text
+            },
             1: { 
               cellWidth: 'auto',
               fontSize: 10,
               fontStyle: 'normal',
-              cellPadding: 6
-            }, // Message column (takes remaining space)
+              cellPadding: 6,
+              textColor: [0, 0, 0] // Return to black text
+            },
             2: { 
               cellWidth: 40,
               fontStyle: 'italic',
-              fontSize: 8
-            }   // Date column
+              fontSize: 8,
+              textColor: [0, 0, 0] // Return to black text
+            }
           },
           alternateRowStyles: {
-            fillColor: [245, 250, 245] // Very light sage for alternate rows
+            fillColor: [255, 255, 255] // Return to white background
           },
           margin: { top: 50, left: 15, right: 15 },
           didParseCell: function(data) {
-            // Add a sage green border to each cell
+            // Keep only the sage green border
             if (data.section === 'body') {
-              data.cell.styles.lineColor = [100, 140, 110]; // Sage green
+              data.cell.styles.lineColor = [100, 140, 110]; // Keep sage green border
               
-              // Make the name cell special
+              // Set text colors back to original
               if (data.column.index === 0) {
                 data.cell.styles.fontStyle = 'bold';
-                data.cell.styles.textColor = [80, 110, 90]; // Darker sage for names
-              }
-              
-              // Message cell gets special treatment
-              if (data.column.index === 1) {
-                data.cell.styles.cellPadding = 8;
+                data.cell.styles.textColor = [0, 0, 0]; // Black for names
               }
             }
           },
           didDrawPage: (data) => {
             // Add page number at the bottom
             doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100); // Gray for page numbers
             doc.text(
               `Page ${data.pageNumber} of ${data.pageCount}`,
               pageWidth / 2, 
@@ -340,30 +326,14 @@ function AdminDashboard({ onLogout }) {
               { align: 'center' }
             );
           }
-        });
-          // Add footer with total count and decorative element
-        doc.setDrawColor(100, 140, 110); // Sage green
-        doc.setLineWidth(0.5);
-        doc.line(pageWidth/4, pageHeight-20, pageWidth*3/4, pageHeight-20); // Decorative line
-        
+        });        // Add footer with total count
         doc.setFont("helvetica", "italic");
         doc.setFontSize(10);
-        doc.setTextColor(100, 140, 110); // Sage green text for footer
+        doc.setTextColor(100, 100, 100); // Return to original gray
         doc.text(
           `Total messages: ${allWishes.length}`,
           pageWidth / 2,
-          pageHeight - 15,
-          { align: 'center' }
-        );
-        
-        // Add page number at the footer
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(120, 120, 120); // Grey text for page numbers
-        doc.text(
-          `Page ${doc.getNumberOfPages()}`,
-          pageWidth / 2,
-          pageHeight - 7,
+          pageHeight - 10,
           { align: 'center' }
         );
         
