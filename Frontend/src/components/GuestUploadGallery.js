@@ -62,24 +62,31 @@ export default function GuestGalleryUpload() {
     if (uploadedCount + files.length > MAX_UPLOADS) {
       setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
       return;
-    }    const compressedFiles = [];
+    }    const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+    const compressedFiles = [];
     for (const file of files) {
       try {
-        // Show processing message for large files
-        if (file.size > 5000000) { // 5MB
-          setError(`Processing ${file.name}... Please wait.`);
-        }
+        let finalFile;
 
-        const options = {
-          maxWidthOrHeight: 4000, // ~12MP (4000x3000)
-          maxSizeMB: 4,          // Optional: limit file size (e.g., 4MB)
-          useWebWorker: true,
-        };
+        // Only compress if file is over 25MB
+        if (file.size > MAX_FILE_SIZE) {
+          setError(`Processing ${file.name}... (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
+          
+          const options = {
+            maxWidthOrHeight: 7100, // ~50MP (7100x7100)
+            maxSizeMB: 25,         // 25MB limit
+            useWebWorker: true,
+          };
+          
+          finalFile = await imageCompression(file, options);
+        } else {
+          // Use original file if under size limit
+          finalFile = file;
+        }
         
-        const compressedFile = await imageCompression(file, options);
-        compressedFile.preview = URL.createObjectURL(compressedFile);
-        compressedFile.name = file.name;
-        compressedFiles.push(compressedFile);
+        finalFile.preview = URL.createObjectURL(finalFile);
+        finalFile.name = file.name;
+        compressedFiles.push(finalFile);
         setError(null);
       } catch (err) {
         console.error('File processing failed:', file.name, err);
