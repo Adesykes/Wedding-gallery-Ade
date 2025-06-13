@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
@@ -197,9 +197,7 @@ function AdminDashboard({ onLogout }) {
       console.error('Error downloading wishes:', err);
       setError('Failed to download guestbook messages');
     }
-  };
-
-  const handleDownloadWishesPDF = async () => {
+  };  const handleDownloadWishesPDF = async () => {
     try {
       // Set loading state
       const downloadingEl = document.createElement('div');
@@ -209,98 +207,142 @@ function AdminDashboard({ onLogout }) {
       
       // Fetch all wishes if needed (in case we need to get more than what's shown)
       let allWishes = wishes;
-      if (wishes.length < stats.totalWishes) {
-        const response = await axios.get(`${API_URL}/api/admin/wishes?limit=1000`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
-        });
-        allWishes = response.data.wishes || response.data;
+      try {
+        if (wishes.length < stats.totalWishes) {
+          const response = await axios.get(`${API_URL}/api/admin/wishes?limit=1000`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+          });
+          allWishes = response.data.wishes || response.data;
+          console.log("Successfully fetched all wishes for PDF:", allWishes.length);
+        }
+      } catch (fetchErr) {
+        console.error("Error fetching all wishes:", fetchErr);
+        // Continue with wishes we already have
       }
       
-      // Create PDF document
-      const pdf = new jsPDF();
+      console.log(`Generating PDF with ${allWishes.length} wishes`);
       
-      // Add title
-      pdf.setFont('times', 'italic');
-      pdf.setFontSize(24);
-      pdf.setTextColor(183, 110, 121); // #B76E79
-      pdf.text('Jamie & Leanne', pdf.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
-      
-      pdf.setFontSize(16);
-      pdf.text('Wedding Guestbook', pdf.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
-      pdf.setFontSize(12);
-      pdf.text('22nd August 2025', pdf.internal.pageSize.getWidth() / 2, 38, { align: 'center' });
-      
-      // Add date
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, pdf.internal.pageSize.getWidth() / 2, 45, { align: 'center' });
-      
-      // Style for header row
-      const tableHeaderStyle = {
-        fillColor: [183, 110, 121], // #B76E79
-        textColor: 255,
-        fontStyle: 'bold',
-        halign: 'center'
-      };
-      
-      // Create wish entries table
-      pdf.autoTable({
-        startY: 55,
-        head: [['Name', 'Message', 'Date']],
-        body: allWishes.map(wish => [
-          wish.name,
-          wish.message,
-          formatDate(wish.createdAt)
-        ]),
-        headStyles: tableHeaderStyle,
-        styles: {
-          overflow: 'linebreak',
-          cellWidth: 'wrap'
-        },
-        columnStyles: {
-          0: { cellWidth: 40 },  // Name column
-          1: { cellWidth: 'auto' }, // Message column (takes remaining space)
-          2: { cellWidth: 40 }   // Date column
-        },
-        margin: { top: 50 },
-        didDrawPage: (data) => {
-          // Add page number at the bottom
-          pdf.setFontSize(10);
-          pdf.text(
-            `Page ${data.pageNumber} of ${pdf.getNumberOfPages()}`,
-            pdf.internal.pageSize.getWidth() / 2, 
-            pdf.internal.pageSize.getHeight() - 10, 
-            { align: 'center' }
-          );
-        }
-      });
-      
-      // Add footer with total count
-      pdf.setFont('helvetica', 'italic');
-      pdf.setFontSize(10);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text(
-        `Total messages: ${allWishes.length}`,
-        pdf.internal.pageSize.getWidth() / 2,
-        pdf.internal.pageSize.getHeight() - 5,
-        { align: 'center' }
-      );
-      
-      // Save PDF
-      pdf.save('jamie-and-leanne-guestbook.pdf');
-      
-      // Show success message
-      downloadingEl.textContent = 'Guestbook PDF downloaded successfully!';
-      downloadingEl.className = 'admin-download-toast success';
-      setTimeout(() => {
-        if (document.body.contains(downloadingEl)) {
-          document.body.removeChild(downloadingEl);
-        }
-      }, 3000);
+      try {
+        // Create PDF document with orientation and unit specifications
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        // Add title
+        doc.setFont("times", "italic");
+        doc.setFontSize(24);
+        doc.setTextColor(183, 110, 121); // #B76E79
+        
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        
+        doc.text('Jamie & Leanne', pageWidth / 2, 20, { align: 'center' });
+        
+        doc.setFontSize(16);
+        doc.text('Wedding Guestbook', pageWidth / 2, 30, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text('22nd August 2025', pageWidth / 2, 38, { align: 'center' });
+        
+        // Add date
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 45, { align: 'center' });
+        
+        // Style for header row
+        const tableHeaderStyle = {
+          fillColor: [183, 110, 121], // #B76E79
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center'
+        };
+        
+        // Prepare data for table, ensuring all fields exist and handling null values
+        const tableData = allWishes.map(wish => [
+          wish && wish.name ? String(wish.name) : '',
+          wish && wish.message ? String(wish.message) : '',
+          wish && wish.createdAt ? formatDate(wish.createdAt) : ''
+        ]);
+        
+        console.log("Table data prepared:", tableData.length);
+        
+        // Create wish entries table
+        doc.autoTable({
+          startY: 55,
+          head: [['Name', 'Message', 'Date']],
+          body: tableData,
+          headStyles: tableHeaderStyle,
+          styles: {
+            overflow: 'linebreak',
+            cellWidth: 'wrap',
+            fontSize: 9
+          },
+          columnStyles: {
+            0: { cellWidth: 40 },  // Name column
+            1: { cellWidth: 'auto' }, // Message column (takes remaining space)
+            2: { cellWidth: 40 }   // Date column
+          },
+          margin: { top: 50 },
+          didDrawPage: (data) => {
+            // Add page number at the bottom
+            doc.setFontSize(10);
+            doc.text(
+              `Page ${data.pageNumber} of ${data.pageCount}`,
+              pageWidth / 2, 
+              pageHeight - 10, 
+              { align: 'center' }
+            );
+          }
+        });
+        
+        // Add footer with total count
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(
+          `Total messages: ${allWishes.length}`,
+          pageWidth / 2,
+          pageHeight - 5,
+          { align: 'center' }
+        );
+        
+        console.log("PDF generated successfully, saving...");
+        
+        // Save PDF
+        doc.save('jamie-and-leanne-guestbook.pdf');
+        
+        console.log("PDF saved successfully");
+        
+        // Show success message
+        downloadingEl.textContent = 'Guestbook PDF downloaded successfully!';
+        downloadingEl.className = 'admin-download-toast success';
+        setTimeout(() => {
+          if (document.body.contains(downloadingEl)) {
+            document.body.removeChild(downloadingEl);
+          }
+        }, 3000);
+      } catch (pdfErr) {
+        console.error("Error during PDF generation:", pdfErr);
+        throw pdfErr; // Re-throw to be caught by outer catch
+      }
     } catch (err) {
       console.error('Error generating PDF:', err);
       setError('Failed to generate PDF guestbook');
+      
+      // Make error more visible
+      const errorEl = document.createElement('div');
+      errorEl.className = 'admin-download-toast';
+      errorEl.style.background = 'var(--admin-danger)';
+      errorEl.textContent = `PDF Generation Error: ${err.message || 'Unknown error'}`;
+      document.body.appendChild(errorEl);
+      
+      setTimeout(() => {
+        if (document.body.contains(errorEl)) {
+          document.body.removeChild(errorEl);
+        }
+      }, 5000);
     }
   };
 
