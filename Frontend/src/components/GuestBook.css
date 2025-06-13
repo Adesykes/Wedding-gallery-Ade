@@ -195,6 +195,8 @@
   position: relative;
   cursor: pointer;
   width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .wish-card:hover {
@@ -223,6 +225,11 @@
   color: #4A4E69;
   line-height: 1.5;
   white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
+  max-width: 100%;
 }
 
 .wish-shimmer {
@@ -376,6 +383,8 @@
   flex-direction: column;
   transition: height 0.3s ease;
   height: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .wish-modal::-webkit-scrollbar {
@@ -433,6 +442,10 @@
   white-space: pre-wrap;
   flex: 1;
   height: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 @keyframes scaleIn {

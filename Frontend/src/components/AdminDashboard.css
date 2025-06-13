@@ -317,6 +317,8 @@
   border: 1px solid var(--admin-border);
   transition: transform 0.2s, box-shadow 0.2s;
   width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .admin-wish-card:hover {
@@ -390,11 +392,15 @@
   flex-direction: column;
   transition: height 0.3s ease;
   height: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .admin-wish-modal {
   background: var(--surface);
   border: 1px solid var(--border);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .wish-modal::-webkit-scrollbar {
@@ -452,6 +458,21 @@
   white-space: pre-wrap;
   flex: 1;
   height: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.wish-message {
+  color: var(--admin-text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
+  max-width: 100%;
 }
 
 .wish-modal-actions {
