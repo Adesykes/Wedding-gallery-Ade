@@ -5,10 +5,15 @@
   position: relative;
 }
 
-.back-button {
-  position: absolute;
-  top: 0;
-  left: 0;
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.back-button,
+.gallery-button {
   background: transparent;
   border: none;
   color: #9CAF88;
@@ -20,9 +25,23 @@
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
+.back-button {
+  margin-right: auto;
+}
+
+.gallery-button {
+  margin-left: auto;
+  color: #FFB6C1;
+}
+
 .back-button:hover {
   color: #B76E79;
   transform: translateX(-3px);
+}
+
+.gallery-button:hover {
+  color: #B76E79;
+  transform: translateX(3px);
 }
 
 .guestbook-header {

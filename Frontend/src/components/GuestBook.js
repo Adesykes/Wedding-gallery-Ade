@@ -125,9 +125,14 @@ export default function GuestBook() {
       <HeartBackground />
       <div className="guestbook-container">
         <header className="guestbook-header">
-          <button className="back-button" onClick={() => navigate('/')}>
-            &larr; Back to Welcome
-          </button>
+          <div className="navigation-buttons">
+            <button className="back-button" onClick={() => navigate('/')}>
+              &larr; Back to Welcome
+            </button>
+            <button className="gallery-button" onClick={() => navigate('/gallery')}>
+              View & Upload Photos
+            </button>
+          </div>
           <h1 className="guestbook-title">Jamie & Leanne</h1>
           <span className="guestbook-date">22nd August 2025</span>
           <p className="guestbook-intro">
