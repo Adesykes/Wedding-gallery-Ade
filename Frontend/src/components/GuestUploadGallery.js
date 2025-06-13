@@ -8,13 +8,11 @@ const MAX_UPLOADS = 30;
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
-export default function GuestGalleryUpload() {
-  const navigate = useNavigate();
+export default function GuestGalleryUpload() {  const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [lightboxImage, setLightboxImage] = useState(null);
 
@@ -290,14 +288,14 @@ export default function GuestGalleryUpload() {
   };
   const handleTouchEnd = () => {
     setLastTouchDistance(null);
-  };
-  // Handle opening the lightbox
+  };  // Handle opening the lightbox
   const openLightbox = (imageUrl, e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setLightboxImage(imageUrl);
+    // No longer set previewImage separately, lightbox handles this
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
@@ -388,8 +386,9 @@ export default function GuestGalleryUpload() {
           </div>
           {selectedFiles.length > 0 && (
             <div className="preview-section">
-              <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>              <p style={{ fontSize: '0.85rem', margin: '0.5rem 0', color: 'var(--text)' }}>
-                Click a photo to preview. Click × to remove a photo. Use buttons below to replace selection.
+              <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>
+              <p style={{ fontSize: '0.85rem', margin: '0.5rem 0', color: 'var(--text)' }}>
+                Click a photo to preview and decide if you like it before uploading.
               </p>
               <div className="preview-grid">
                 {selectedFiles.map((file, i) => (
@@ -397,46 +396,44 @@ export default function GuestGalleryUpload() {
                     <img
                       src={file.preview}
                       alt={file.name}
-                      onClick={() => setPreviewImage(file.preview)}
+                      onClick={(e) => openLightbox(file.preview, e)}
                     />
-                    <button
-                      onClick={() => removeFile(i)}
-                      className="remove-button"
-                      aria-label="Remove photo"
-                    >
-                      ×
-                    </button>
                   </div>
                 ))}
-              </div>              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-                  <span>📷 Replace with Camera</span>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                    capture="environment"
-                    onChange={handleFileChange}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-                <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-                  <span>🖼️ Replace with Gallery</span>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                    multiple
-                    onChange={handleFileChange}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-                <button
-                  onClick={handleUpload}
-                  disabled={uploading}
-                  className="upload-button primary"
-                  style={{ margin: '0.25rem' }}
-                >
-                  {uploading ? 'Uploading...' : '📤 Upload Memories'}
-                </button>
+              </div>
+              
+              <div className="lightbox-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem' }}>
+                {lightboxImage && (
+                  <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+                    <p style={{ fontWeight: 'bold', color: 'var(--accent)' }}>Currently Previewing:</p>
+                    <div style={{ 
+                      display: 'flex', 
+                      gap: '0.5rem', 
+                      justifyContent: 'center', 
+                      marginTop: '0.5rem' 
+                    }}>
+                      <button 
+                        onClick={() => {
+                          // Find and remove the currently previewed image
+                          const index = selectedFiles.findIndex(file => file.preview === lightboxImage);
+                          if (index !== -1) removeFile(index);
+                          closeLightbox();
+                        }}
+                        className="upload-button secondary"
+                        style={{ fontSize: '0.85rem', backgroundColor: 'var(--error)', color: 'white' }}
+                      >
+                        🗑️ Remove This Photo
+                      </button>
+                      <button 
+                        onClick={closeLightbox}
+                        className="upload-button secondary"
+                        style={{ fontSize: '0.85rem' }}
+                      >
+                        ✓ Keep This Photo
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -499,26 +496,24 @@ export default function GuestGalleryUpload() {
                     No photos uploaded yet.
                   </p>
             }
-          </div>
-          {/* Preview Section - Now inside the container */}
-          {previewImage && (
-            <div className="preview-container">
-              <img
-                src={previewImage}
-                alt="Upload preview"
-                onClick={(e) => openLightbox(previewImage, e)}
-              />
-            </div>
-          )}
-        </div>
-        {/* Lightbox */}
+          </div>          {/* Preview Section - Now inside the container */}
+          {/* We no longer need the separate preview container since lightbox handles previews */}
+        </div>        {/* Lightbox */}
         <div
           className={`lightbox-overlay ${lightboxImage ? 'active' : ''}`}
           onClick={handleLightboxClick}
         >
           {lightboxImage && (
             <div className="lightbox-content">
-              <img src={lightboxImage} alt="Enlarged view" className="lightbox-image" />
+              <img 
+                src={lightboxImage} 
+                alt="Enlarged view" 
+                className="lightbox-image" 
+                style={{ transform: `scale(${scale})` }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              />
               <button className="lightbox-close" onClick={closeLightbox}>
                 ×
               </button>
