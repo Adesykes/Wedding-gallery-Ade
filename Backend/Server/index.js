@@ -8,6 +8,7 @@ const axios = require('axios');
 const uploadRoutes = require('./routes/upload');
 const photosRoutes = require('./routes/photos');    // for /api/photos
 const adminRoutes = require('./routes/admin');      // for /api/admin
+const wishesRoutes = require('./routes/wishes');    // for /api/wishes
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use((req, res, next) => {
 app.use('/api/upload', uploadRoutes);
 app.use('/api/photos', photosRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/wishes', wishesRoutes);
 
 // --- PING ROUTE ---
 app.get('/ping', (req, res) => {

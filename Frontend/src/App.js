@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 
 import WelcomeScreen from './components/WelcomeScreen';
 import GuestUploadGallery from './components/GuestUploadGallery';
+import GuestBook from './components/GuestBook';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -28,6 +29,7 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<WelcomeScreen />} />
         <Route path="/gallery" element={<GuestUploadGallery />} />
+        <Route path="/guestbook" element={<GuestBook />} />
 
         <Route
           path="/admin/login"

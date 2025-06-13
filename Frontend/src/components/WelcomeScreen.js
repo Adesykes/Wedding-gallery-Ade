@@ -99,9 +99,7 @@ Let's flood this digital album with laughter, boundless love, and truly unforget
 
 With all our love & thanks,
 Adrian & Kerry`}
-          </motion.p>
-
-          <motion.button
+          </motion.p>          <motion.button
             className="welcome-button"
             onClick={() => navigate('/gallery')}
             whileHover={{ scale: 1.02 }}
@@ -111,6 +109,18 @@ Adrian & Kerry`}
             transition={{ delay: 1, duration: 0.5 }}
           >
             Upload Your Photos
+          </motion.button>
+
+          <motion.button
+            className="welcome-button secondary"
+            onClick={() => navigate('/guestbook')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 1.1, duration: 0.5 }}
+          >
+            Sign Guest Book
           </motion.button>
 
           <motion.button

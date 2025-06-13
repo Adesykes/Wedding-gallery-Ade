@@ -1,0 +1,215 @@
+.guestbook-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.guestbook-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.guestbook-title {
+  font-family: var(--font-primary, 'Playfair Display', serif);
+  font-size: clamp(2.5rem, 8vw, 3.5rem);
+  background: linear-gradient(135deg, #B76E79, #FFD700);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.guestbook-date {
+  font-family: var(--font-secondary, 'Lucida Handwriting', cursive);
+  font-size: 1.5rem;
+  color: #9CAF88;
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.guestbook-intro {
+  font-size: 1.1rem;
+  color: #4A4E69;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.wish-form {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(200, 182, 255, 0.2);
+}
+
+.form-title {
+  color: #C8B6FF;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4A4E69;
+  font-weight: 600;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #FFE4E6;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #C8B6FF;
+  box-shadow: 0 0 0 3px rgba(200, 182, 255, 0.2);
+}
+
+.form-submit {
+  background: linear-gradient(135deg, #C8B6FF, #FFB6C1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.form-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.form-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.char-count {
+  font-size: 0.8rem;
+  color: #6B7280;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+.wishes-container {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.wish-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  border: 1px solid rgba(200, 182, 255, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.wish-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+}
+
+.wish-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.wish-name {
+  font-weight: 600;
+  color: #4A4E69;
+  font-size: 1.1rem;
+}
+
+.wish-date {
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
+.wish-message {
+  color: #4A4E69;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.wish-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f9e6f0 25%,
+    #f3dce7 50%,
+    #f9e6f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+  height: 120px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.error-message {
+  color: #FF6B6B;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.success-message {
+  background: rgba(156, 175, 136, 0.2);
+  color: #4A4E69;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 768px) {
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .form-submit {
+    width: auto;
+  }
+  
+  .wishes-container {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}

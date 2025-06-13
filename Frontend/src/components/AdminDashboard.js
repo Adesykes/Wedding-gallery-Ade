@@ -8,13 +8,16 @@ const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 function AdminDashboard({ onLogout }) {
   const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
+  const [wishes, setWishes] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [activeTab, setActiveTab] = useState('photos'); // Add tab state for switching between photos and wishes
   const [stats, setStats] = useState({
     totalPhotos: 0,
     totalGuests: 0,
-    totalStorage: '0 MB'
+    totalStorage: '0 MB',
+    totalWishes: 0
   });
 
   const fetchPhotos = async () => {
@@ -27,11 +30,14 @@ function AdminDashboard({ onLogout }) {
       // Calculate stats
       const uniqueGuests = new Set(res.data.map(photo => photo.guestId)).size;
       const totalSize = res.data.reduce((acc, photo) => acc + (photo.size || 0), 0);
-      setStats({
+      
+      // Update photos-related stats
+      setStats(prevStats => ({
+        ...prevStats,
         totalPhotos: res.data.length,
         totalGuests: uniqueGuests,
         totalStorage: `${(totalSize / (1024 * 1024)).toFixed(2)} MB`
-      });
+      }));
       
       setLoading(false);
     } catch (err) {
@@ -40,8 +46,26 @@ function AdminDashboard({ onLogout }) {
     }
   };
 
+  const fetchWishes = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/admin/wishes`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      setWishes(res.data);
+      
+      // Update wishes-related stats
+      setStats(prevStats => ({
+        ...prevStats,
+        totalWishes: res.data.length
+      }));
+    } catch (err) {
+      setError('Failed to load wishes');
+    }
+  };
+
   useEffect(() => {
     fetchPhotos();
+    fetchWishes();
   }, []);
 
   const handleDelete = async (photoId) => {
@@ -97,6 +121,35 @@ function AdminDashboard({ onLogout }) {
     }
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'photos' && photos.length === 0) {
+      fetchPhotos();
+    } else if (tab === 'wishes' && wishes.length === 0) {
+      fetchWishes();
+    }
+  };
+
+  const handleDeleteWish = async (wishId) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) return;
+
+    try {
+      await axios.delete(
+        `${API_URL}/api/admin/wishes/${wishId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+        }
+      );
+      setWishes((prev) => prev.filter((w) => w._id !== wishId));
+      setStats(prevStats => ({
+        ...prevStats,
+        totalWishes: prevStats.totalWishes - 1
+      }));
+    } catch (err) {
+      setError('Failed to delete message');
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -116,73 +169,136 @@ function AdminDashboard({ onLogout }) {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="admin-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'photos' ? 'active' : ''}`}
+          onClick={() => setActiveTab('photos')}
+        >
+          Photos ({stats.totalPhotos})
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'wishes' ? 'active' : ''}`}
+          onClick={() => setActiveTab('wishes')}
+        >
+          Guest Book ({stats.totalWishes})
+        </button>
+      </div>
+
       {/* Stats Section */}
       <div className="stats-container">
-        <div className="stat-card">
-          <div className="stat-title">Total Photos</div>
-          <div className="stat-value">{stats.totalPhotos}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">Total Guests</div>
-          <div className="stat-value">{stats.totalGuests}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">Storage Used</div>
-          <div className="stat-value">{stats.totalStorage}</div>
-        </div>
+        {activeTab === 'photos' ? (
+          <>
+            <div className="stat-card">
+              <div className="stat-title">Total Photos</div>
+              <div className="stat-value">{stats.totalPhotos}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-title">Total Guests</div>
+              <div className="stat-value">{stats.totalGuests}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-title">Storage Used</div>
+              <div className="stat-value">{stats.totalStorage}</div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="stat-card">
+              <div className="stat-title">Total Messages</div>
+              <div className="stat-value">{stats.totalWishes}</div>
+            </div>
+          </>
+        )}
       </div>
 
       {error && <div className="error-message">{error}</div>}
 
-      {/* Bulk Actions */}
-      {photos.length > 0 && (
-        <div className="bulk-actions">
-          <button 
-            className="admin-button admin-button-secondary"
-            onClick={handleSelectAll}
-          >
-            {selectedPhotos.length === photos.length ? 'Deselect All' : 'Select All'}
-          </button>
-          {selectedPhotos.length > 0 && (
-            <button 
-              className="admin-button admin-button-danger"
-              onClick={handleDeleteSelected}
-            >
-              Delete Selected ({selectedPhotos.length})
-            </button>
+      {/* Content based on active tab */}
+      {activeTab === 'photos' ? (
+        <>
+          {/* Bulk Actions */}
+          {photos.length > 0 && (
+            <div className="bulk-actions">
+              <button 
+                className="admin-button admin-button-secondary"
+                onClick={handleSelectAll}
+              >
+                {selectedPhotos.length === photos.length ? 'Deselect All' : 'Select All'}
+              </button>
+              {selectedPhotos.length > 0 && (
+                <button 
+                  className="admin-button admin-button-danger"
+                  onClick={handleDeleteSelected}
+                >
+                  Delete Selected ({selectedPhotos.length})
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Photos Grid */}
+          <div className="photos-grid">
+            {photos.map((photo) => (
+              <div key={photo._id} className="photo-card">
+                <div className="photo-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedPhotos.includes(photo._id)}
+                    onChange={() => handleSelectPhoto(photo._id)}
+                  />
+                </div>
+                <img src={photo.url} alt="Wedding" />
+                <div className="photo-info">
+                  <div className="photo-guest">Guest ID: {photo.guestId}</div>
+                  <div className="photo-date">
+                    {new Date(photo.uploadDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="photo-actions">
+                  <button
+                    className="admin-button admin-button-danger"
+                    onClick={() => handleDelete(photo._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        /* Wishes Section */
+        <div className="wishes-grid">
+          {wishes.length > 0 ? wishes.map((wish) => (
+            <div key={wish._id} className="wish-card admin-wish-card">
+              <div className="wish-header">
+                <div className="wish-name">{wish.name}</div>
+                <div className="wish-date">
+                  {new Date(wish.createdAt).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </div>
+              <div className="wish-message">{wish.message}</div>
+              <div className="wish-actions">
+                <button
+                  className="admin-button admin-button-danger"
+                  onClick={() => handleDeleteWish(wish._id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )) : (
+            <div className="empty-state">No guest book messages yet.</div>
           )}
         </div>
       )}
-
-      {/* Photos Grid */}
-      <div className="photos-grid">
-        {photos.map((photo) => (
-          <div key={photo._id} className="photo-card">
-            <div className="photo-checkbox">
-              <input
-                type="checkbox"
-                checked={selectedPhotos.includes(photo._id)}
-                onChange={() => handleSelectPhoto(photo._id)}
-              />
-            </div>
-            <img src={photo.url} alt="Wedding" />
-            <div className="photo-info">
-              <div className="photo-guest">Guest ID: {photo.guestId}</div>
-              <div className="photo-date">
-                {new Date(photo.uploadDate).toLocaleDateString()}
-              </div>
-            </div>
-            <div className="photo-actions">
-              <button
-                className="admin-button admin-button-danger"
-                onClick={() => handleDelete(photo._id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

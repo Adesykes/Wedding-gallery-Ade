@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const Photo = require('../models/Photo'); // ✅ Fixed path
+const Wish = require('../models/Wish'); // Add Wish model
 const router = express.Router();
 const JSZip = require('jszip');
 const axios = require('axios');
@@ -62,6 +63,33 @@ router.delete('/delete/:id', verifyToken, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete photo' });
+  }
+});
+
+// Get all wishes
+router.get('/wishes', verifyToken, async (req, res) => {
+  try {
+    const wishes = await Wish.find().sort({ createdAt: -1 });
+    res.json(wishes);
+  } catch (err) {
+    console.error('Error fetching wishes:', err);
+    res.status(500).json({ error: 'Failed to fetch wishes' });
+  }
+});
+
+// Delete wish
+router.delete('/wishes/:id', verifyToken, async (req, res) => {
+  try {
+    const wish = await Wish.findByIdAndDelete(req.params.id);
+    
+    if (!wish) {
+      return res.status(404).json({ error: 'Wish not found' });
+    }
+    
+    res.json({ success: true, message: 'Wish deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting wish:', err);
+    res.status(500).json({ error: 'Failed to delete wish' });
   }
 });
 
