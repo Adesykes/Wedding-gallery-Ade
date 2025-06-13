@@ -3,9 +3,7 @@ import PageWrapper from '../components/PageWrapper';
 import imageCompression from 'browser-image-compression';
 import './GuestUploadGallery.css';
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
-
 const MAX_UPLOADS = 30;
-
 export default function GuestGalleryUpload() {
   const [photos, setPhotos] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -55,31 +53,37 @@ export default function GuestGalleryUpload() {
   }, []);  const handleFileChange = async (e) => {
     setError(null);
     const files = Array.from(e.target.files);
-    
+
     // Clear input value to allow selecting the same file again
     e.target.value = '';
-    
+
     if (uploadedCount + files.length > MAX_UPLOADS) {
-      setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
+      setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);      
       return;
-    }    const compressedFiles = [];
+    }    const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+    const compressedFiles = [];
     for (const file of files) {
       try {
-        // Show processing message for large files
-        if (file.size > 5000000) { // 5MB
-          setError(`Processing ${file.name}... Please wait.`);
+        let finalFile;
+        // Only compress if file is over 25MB
+        if (file.size > MAX_FILE_SIZE) {
+          setError(`Processing ${file.name}... (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
+
+          const options = {
+            maxWidthOrHeight: 7100, // ~50MP (7100x7100)
+            maxSizeMB: 25,         // 25MB limit
+            useWebWorker: true,
+          };
+
+          finalFile = await imageCompression(file, options);
+        } else {
+          // Use original file if under size limit
+          finalFile = file;
         }
 
-        const options = {
-          maxWidthOrHeight: 4000, // ~12MP (4000x3000)
-          maxSizeMB: 4,          // Optional: limit file size (e.g., 4MB)
-          useWebWorker: true,
-        };
-        
-        const compressedFile = await imageCompression(file, options);
-        compressedFile.preview = URL.createObjectURL(compressedFile);
-        compressedFile.name = file.name;
-        compressedFiles.push(compressedFile);
+        finalFile.preview = URL.createObjectURL(finalFile);
+        finalFile.name = file.name;
+        compressedFiles.push(finalFile);
         setError(null);
       } catch (err) {
         console.error('File processing failed:', file.name, err);
@@ -101,10 +105,8 @@ export default function GuestGalleryUpload() {
       setError('No files selected.');
       return;
     }
-
     setUploading(true);
     setError(null);
-
     try {
       // When uploading, include guestId in the form data
       for (const file of selectedFiles) {
@@ -118,7 +120,6 @@ export default function GuestGalleryUpload() {
         const data = await res.json();
         setPhotos(prev => [data, ...prev]);
       }
-
       // Update counts
       const newCount = uploadedCount + selectedFiles.length;
       setUploadedCount(newCount);
@@ -130,7 +131,6 @@ export default function GuestGalleryUpload() {
       setUploading(false);
     }
   };
-
   const removeFile = (index) => {
     if (selectedFiles[index]?.preview) {
       URL.revokeObjectURL(selectedFiles[index].preview);
@@ -139,22 +139,18 @@ export default function GuestGalleryUpload() {
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
   };
-
   useEffect(() => {
     selectedFiles.forEach(file => {
       if (file.preview) URL.revokeObjectURL(file.preview);
     });
-
     const filesWithPreview = selectedFiles.map(file =>
       Object.assign(file, { preview: URL.createObjectURL(file) })
     );
     setSelectedFiles(filesWithPreview);
-
     return () => {
       filesWithPreview.forEach(file => URL.revokeObjectURL(file.preview));
     };
   }, [selectedFiles.length]);
-
   const colors = {
     primary: '#D946EF',
     accent: '#F472B6',
@@ -166,7 +162,6 @@ export default function GuestGalleryUpload() {
     success: '#10B981', // Adding success color for reset feedback
     warning: '#F59E0B',
   };
-
   const PlaceholderCard = () => (
     <div style={{
       height: 150,
@@ -176,13 +171,10 @@ export default function GuestGalleryUpload() {
       animation: 'shimmer 1.5s infinite',
     }} />
   );
-
   const uploadsLeft = MAX_UPLOADS - uploadedCount;
-
   // --- Admin Reset User Count ---
   const [resetPasscode, setResetPasscode] = useState('');
   const [resetMessage, setResetMessage] = useState('');
-
   const handleResetUserCount = async () => {
     setResetMessage('');
     if (!resetPasscode) {
@@ -208,10 +200,9 @@ export default function GuestGalleryUpload() {
       setResetMessage('Reset failed.');
     }
   };
-
   useEffect(() => {
     const container = document.querySelector('.upload-container');
-    
+
     const handleMouseMove = (e) => {
       if (!container) return;
       const rect = container.getBoundingClientRect();
@@ -220,15 +211,12 @@ export default function GuestGalleryUpload() {
       container.style.setProperty('--mouse-x', `${x}%`);
       container.style.setProperty('--mouse-y', `${y}%`);
     };
-
     container?.addEventListener('mousemove', handleMouseMove);
     return () => container?.removeEventListener('mousemove', handleMouseMove);
   }, []);
-
   // Add pinch-zoom support for lightbox
   const [scale, setScale] = useState(1);
   const [lastTouchDistance, setLastTouchDistance] = useState(null);
-
   const handleTouchStart = (e) => {
     if (e.touches.length === 2) {
       const distance = Math.hypot(
@@ -238,7 +226,6 @@ export default function GuestGalleryUpload() {
       setLastTouchDistance(distance);
     }
   };
-
   const handleTouchMove = (e) => {
     if (e.touches.length === 2 && lastTouchDistance) {
       e.preventDefault();
@@ -251,7 +238,6 @@ export default function GuestGalleryUpload() {
       setLastTouchDistance(distance);
     }
   };
-
   const handleTouchEnd = () => {
     setLastTouchDistance(null);
   };
@@ -266,7 +252,6 @@ export default function GuestGalleryUpload() {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
   };
-
   // Handle closing the lightbox
   const closeLightbox = (e) => {
     if (e) {
@@ -278,15 +263,13 @@ export default function GuestGalleryUpload() {
     document.body.style.position = '';
     document.body.style.width = '';
   };
-
   // Handle clicking outside the lightbox to close it
   const handleLightboxClick = (e) => {
-    if (e.target.classList.contains('lightbox-overlay') || 
+    if (e.target.classList.contains('lightbox-overlay') ||
         e.target.classList.contains('lightbox-close')) {
       closeLightbox(e);
     }
   };
-
   // Handle escape key to close lightbox
   useEffect(() => {
     const handleEscape = (e) => {
@@ -294,16 +277,13 @@ export default function GuestGalleryUpload() {
         closeLightbox();
       }
     };
-
     if (lightboxImage) {
       window.addEventListener('keydown', handleEscape);
     }
-
     return () => {
       window.removeEventListener('keydown', handleEscape);
     };
   }, [lightboxImage]);
-
   return (
     <PageWrapper>
       <div className="guest-upload-gallery">
@@ -317,14 +297,13 @@ export default function GuestGalleryUpload() {
           <p style={{ marginBottom: '0.5rem' }}>
             You can upload up to {MAX_UPLOADS} photos per device.
           </p>
-          <p style={{ 
+          <p style={{
             fontWeight: 'bold',
             color: uploadsLeft === 0 ? 'var(--error)' : 'var(--accent)',
             marginBottom: '1.5rem'
           }}>
             Uploads left: {uploadsLeft > 0 ? uploadsLeft : 0}
           </p>
-
           <div className="upload-options">
             <label className="upload-button primary">
               <span>📷 Take Photo</span>
@@ -337,7 +316,6 @@ export default function GuestGalleryUpload() {
                 style={{ display: 'none' }}
               />
             </label>
-
             <label className="upload-button secondary">
               <span>🖼️ Choose from Gallery</span>
               <input
@@ -350,7 +328,6 @@ export default function GuestGalleryUpload() {
               />
             </label>
           </div>
-
           {selectedFiles.length > 0 && (
             <div className="preview-section">
               <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>
@@ -372,7 +349,6 @@ export default function GuestGalleryUpload() {
                   </div>
                 ))}
               </div>
-
               <button
                 onClick={handleUpload}
                 disabled={uploading}
@@ -383,19 +359,17 @@ export default function GuestGalleryUpload() {
               </button>
             </div>
           )}
-
           {error && (
-            <p style={{ color: 'var(--error)', marginTop: '1rem', textAlign: 'center', fontWeight: 600 }}>
+            <p style={{ color: 'var(--error)', marginTop: '1rem', textAlign: 'center', fontWeight: 600 }}
+>
               {error}
             </p>
           )}
-
-          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>
+          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
             Photos will be resized to a maximum of 12 megapixels for faster uploads.
           </p>
+          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />     
 
-          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />
-          
           <div className="admin-reset">
             <h4>Admin Reset</h4>
             <div className="admin-reset-inputs">
@@ -416,12 +390,11 @@ export default function GuestGalleryUpload() {
               </button>
             </div>
             {resetMessage && (
-              <p className={`admin-message ${resetMessage.includes('failed') ? 'error' : 'success'}`}>
+              <p className={`admin-message ${resetMessage.includes('failed') ? 'error' : 'success'}`}>   
                 {resetMessage}
               </p>
             )}
           </div>
-
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', textAlign: 'center' }}>
             Your Uploaded Photos
           </h3>          <div className="gallery-scroll">
@@ -446,7 +419,6 @@ export default function GuestGalleryUpload() {
                   </p>
             }
           </div>
-
           {/* Preview Section - Now inside the container */}
           {previewImage && (
             <div className="preview-container">
@@ -458,9 +430,8 @@ export default function GuestGalleryUpload() {
             </div>
           )}
         </div>
-
         {/* Lightbox */}
-        <div 
+        <div
           className={`lightbox-overlay ${lightboxImage ? 'active' : ''}`}
           onClick={handleLightboxClick}
         >
@@ -473,10 +444,9 @@ export default function GuestGalleryUpload() {
             </div>
           )}
         </div>
-
         {error && (
-          <div 
-            style={{ 
+          <div
+            style={{
               position: 'fixed',
               bottom: '20px',
               left: '50%',
@@ -494,7 +464,7 @@ export default function GuestGalleryUpload() {
             {error}
           </div>
         )}
-      </div>
+ </div>
     </PageWrapper>
   );
 }
