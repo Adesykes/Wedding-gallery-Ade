@@ -6,7 +6,7 @@ import './GuestUploadGallery.css';
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 const MAX_UPLOADS = 30;
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
 export default function GuestGalleryUpload() {
   const navigate = useNavigate();
@@ -68,12 +68,11 @@ export default function GuestGalleryUpload() {
     }
 
     const compressedFiles = [];
-    for (const file of files) {
-      try {
+    for (const file of files) {      try {
         // Validate file type
         if (!ACCEPTED_TYPES.includes(file.type.toLowerCase())) {
-          throw new Error(`Unsupported file type: ${file.type}. Please use JPEG or PNG images.`);
-        }        let finalFile;        const compressionOptions = {
+          throw new Error(`Unsupported file type: ${file.type}. Please use JPEG, PNG, WebP, HEIC, or HEIF images.`);
+        }let finalFile;        const compressionOptions = {
           maxWidthOrHeight: 2000, // ~4MP (2000x2000)
           maxSizeMB: 4,          // 4MB limit
           useWebWorker: true,
@@ -331,10 +330,12 @@ export default function GuestGalleryUpload() {
             <button className="gallery-action-button" onClick={() => navigate('/guestbook')}>
               Sign Guest Book
             </button>
-          </div>
-        </section>        <div className="upload-container">
+          </div>        </section>        <div className="upload-container">
           <p style={{ marginBottom: '0.5rem' }}>
             You can upload up to {MAX_UPLOADS} photos per device.
+          </p>
+          <p style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text)' }}>
+            Supported formats: JPEG, PNG, WebP, HEIC, HEIF (max 4MB per image)
           </p>
           <p style={{
             fontWeight: 'bold',
@@ -345,10 +346,9 @@ export default function GuestGalleryUpload() {
           </p>
           <div className="upload-options">
             <label className="upload-button primary">
-              <span>📷 Take Photo</span>
-              <input
+              <span>📷 Take Photo</span>              <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                 capture="environment"
                 disabled={uploading || uploadsLeft <= 0}
                 onChange={handleFileChange}
@@ -356,10 +356,9 @@ export default function GuestGalleryUpload() {
               />
             </label>
             <label className="upload-button secondary">
-              <span>🖼️ Choose from Gallery</span>
-              <input
+              <span>🖼️ Choose from Gallery</span>              <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                 multiple
                 disabled={uploading || uploadsLeft <= 0}
                 onChange={handleFileChange}
