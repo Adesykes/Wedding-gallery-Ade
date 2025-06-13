@@ -72,7 +72,7 @@ export default function GuestGalleryUpload() {
         if (!ACCEPTED_TYPES.includes(file.type.toLowerCase())) {
           throw new Error(`Unsupported file type: ${file.type}. Please use JPEG or PNG images.`);
         }        let finalFile;        const compressionOptions = {
-          maxWidthOrHeight: 7100, // ~50MP (7100x7100)
+          maxWidthOrHeight: 3500, // ~12MP (3500x3500)
           maxSizeMB: 35,         // 35MB limit
           useWebWorker: true,
           initialQuality: 0.9,   // Start with high quality
@@ -394,7 +394,7 @@ export default function GuestGalleryUpload() {
             </p>
           )}
           <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
-            Photos will be resized to a maximum of 50 megapixels (7100x7100) and 35MB to preserve high quality.
+            Photos will be resized to a maximum of 12 megapixels (3500x3500) and 35MB to preserve good quality.
           </p>
           <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />     
 
