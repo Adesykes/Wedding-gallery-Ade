@@ -229,14 +229,22 @@ function AdminDashboard({ onLogout }) {
           unit: 'mm',
           format: 'a4'
         });
-        
-        // Add title
+          // Add title
         doc.setFont("times", "italic");
         doc.setFontSize(24);
-        doc.setTextColor(183, 110, 121); // #B76E79
+        doc.setTextColor(100, 140, 110); // Sage green for title
         
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
+        
+        // Add a light sage green background for the header
+        doc.setFillColor(240, 248, 240); // Very light sage green
+        doc.rect(0, 0, pageWidth, 50, 'F');
+        
+        // Add a decorative border
+        doc.setDrawColor(100, 140, 110); // Sage green border
+        doc.setLineWidth(0.5);
+        doc.rect(5, 5, pageWidth-10, pageHeight-10, 'S');
         
         doc.text('Jamie & Leanne', pageWidth / 2, 20, { align: 'center' });
         
@@ -250,13 +258,16 @@ function AdminDashboard({ onLogout }) {
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
         doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 45, { align: 'center' });
-        
-        // Style for header row
+          // Style for header row
         const tableHeaderStyle = {
-          fillColor: [183, 110, 121], // #B76E79
-          textColor: [255, 255, 255],
+          fillColor: [100, 140, 110], // Sage green header
+          textColor: [255, 255, 255], // White text
           fontStyle: 'bold',
-          halign: 'center'
+          halign: 'center',
+          cellPadding: 8,
+          fontSize: 12,
+          lineWidth: 0.5,
+          lineColor: [80, 120, 90] // Slightly darker sage for header border
         };
         
         // Prepare data for table, ensuring all fields exist and handling null values
@@ -267,8 +278,7 @@ function AdminDashboard({ onLogout }) {
         ]);
         
         console.log("Table data prepared:", tableData.length);
-        
-        // Create wish entries table
+          // Create wish entries table
         doc.autoTable({
           startY: 55,
           head: [['Name', 'Message', 'Date']],
@@ -277,14 +287,49 @@ function AdminDashboard({ onLogout }) {
           styles: {
             overflow: 'linebreak',
             cellWidth: 'wrap',
-            fontSize: 9
+            fontSize: 9,
+            cellPadding: 5,
+            lineColor: [100, 140, 110], // Sage green color for borders
+            lineWidth: 0.5
           },
           columnStyles: {
-            0: { cellWidth: 40 },  // Name column
-            1: { cellWidth: 'auto' }, // Message column (takes remaining space)
-            2: { cellWidth: 40 }   // Date column
+            0: { 
+              cellWidth: 40,
+              fontStyle: 'bold'
+            },  // Name column
+            1: { 
+              cellWidth: 'auto',
+              fontSize: 10,
+              fontStyle: 'normal',
+              cellPadding: 6
+            }, // Message column (takes remaining space)
+            2: { 
+              cellWidth: 40,
+              fontStyle: 'italic',
+              fontSize: 8
+            }   // Date column
           },
-          margin: { top: 50 },
+          alternateRowStyles: {
+            fillColor: [245, 250, 245] // Very light sage for alternate rows
+          },
+          margin: { top: 50, left: 15, right: 15 },
+          didParseCell: function(data) {
+            // Add a sage green border to each cell
+            if (data.section === 'body') {
+              data.cell.styles.lineColor = [100, 140, 110]; // Sage green
+              
+              // Make the name cell special
+              if (data.column.index === 0) {
+                data.cell.styles.fontStyle = 'bold';
+                data.cell.styles.textColor = [80, 110, 90]; // Darker sage for names
+              }
+              
+              // Message cell gets special treatment
+              if (data.column.index === 1) {
+                data.cell.styles.cellPadding = 8;
+              }
+            }
+          },
           didDrawPage: (data) => {
             // Add page number at the bottom
             doc.setFontSize(10);
@@ -296,15 +341,29 @@ function AdminDashboard({ onLogout }) {
             );
           }
         });
+          // Add footer with total count and decorative element
+        doc.setDrawColor(100, 140, 110); // Sage green
+        doc.setLineWidth(0.5);
+        doc.line(pageWidth/4, pageHeight-20, pageWidth*3/4, pageHeight-20); // Decorative line
         
-        // Add footer with total count
         doc.setFont("helvetica", "italic");
         doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(100, 140, 110); // Sage green text for footer
         doc.text(
           `Total messages: ${allWishes.length}`,
           pageWidth / 2,
-          pageHeight - 5,
+          pageHeight - 15,
+          { align: 'center' }
+        );
+        
+        // Add page number at the footer
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(120, 120, 120); // Grey text for page numbers
+        doc.text(
+          `Page ${doc.getNumberOfPages()}`,
+          pageWidth / 2,
+          pageHeight - 7,
           { align: 'center' }
         );
         
