@@ -4,6 +4,9 @@ import imageCompression from 'browser-image-compression';
 import './GuestUploadGallery.css';
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 const MAX_UPLOADS = 30;
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
+
 export default function GuestGalleryUpload() {
   const [photos, setPhotos] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -60,25 +63,47 @@ export default function GuestGalleryUpload() {
     if (uploadedCount + files.length > MAX_UPLOADS) {
       setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);      
       return;
-    }    const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+    }
+
     const compressedFiles = [];
     for (const file of files) {
       try {
-        let finalFile;
-        // Only compress if file is over 25MB
+        // Validate file type
+        if (!ACCEPTED_TYPES.includes(file.type.toLowerCase())) {
+          throw new Error(`Unsupported file type: ${file.type}. Please use JPEG or PNG images.`);
+        }        let finalFile;
+        const compressionOptions = {
+          maxWidthOrHeight: 3500, // ~12MP (3500x3500)
+          maxSizeMB: 4,          // 4MB limit
+          useWebWorker: true,
+          initialQuality: 0.8    // Start with good quality
+        };
+
+        // Show processing message for large files
         if (file.size > MAX_FILE_SIZE) {
-          setError(`Processing ${file.name}... (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
-
-          const options = {
-            maxWidthOrHeight: 7100, // ~50MP (7100x7100)
-            maxSizeMB: 25,         // 25MB limit
-            useWebWorker: true,
-          };
-
-          finalFile = await imageCompression(file, options);
+          const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+          setError(`Processing ${file.name} (${sizeMB}MB)... This might take a moment.`);
+          
+          try {
+            finalFile = await imageCompression(file, compressionOptions);
+              // If still too large after compression, try again with more aggressive settings
+            if (finalFile.size > MAX_FILE_SIZE) {
+              compressionOptions.maxSizeMB = 2;
+              compressionOptions.initialQuality = 0.6;
+              finalFile = await imageCompression(file, compressionOptions);
+            }
+          } catch (compressionErr) {
+            console.error('Compression failed:', compressionErr);
+            throw new Error(`Failed to compress ${file.name}. The file might be too large or corrupted.`);
+          }
         } else {
           // Use original file if under size limit
           finalFile = file;
+        }
+
+        // Validate the final file
+        if (finalFile.size > MAX_FILE_SIZE) {
+          throw new Error(`${file.name} is too large (${(finalFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 4MB.`);
         }
 
         finalFile.preview = URL.createObjectURL(finalFile);
@@ -87,16 +112,20 @@ export default function GuestGalleryUpload() {
         setError(null);
       } catch (err) {
         console.error('File processing failed:', file.name, err);
-        setError(`Failed to process ${file.name}. Please try a different image.`);
+        setError(err.message || `Failed to process ${file.name}. Please try a different image.`);
+        // Clean up any created object URLs
+        compressedFiles.forEach(f => URL.revokeObjectURL(f.preview));
         return;
       }
     }
-      if (compressedFiles.length > 0) {
-      setSelectedFiles(compressedFiles);
-    }
-      if (compressedFiles.length > 0) {
+      
+    if (compressedFiles.length > 0) {
       setError(null);
-      setSelectedFiles(compressedFiles);
+      setSelectedFiles(prevFiles => {
+        // Clean up old preview URLs
+        prevFiles.forEach(f => URL.revokeObjectURL(f.preview));
+        return compressedFiles;
+      });
     }
   };
 
@@ -366,7 +395,7 @@ export default function GuestGalleryUpload() {
             </p>
           )}
           <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
-            Photos will be resized to a maximum of 12 megapixels for faster uploads.
+            Photos will be resized to a maximum of 12 megapixels (3500x3500) and 4MB for faster uploads.
           </p>
           <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />     
 
