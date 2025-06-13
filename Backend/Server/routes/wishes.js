@@ -2,34 +2,41 @@ const express = require('express');
 const router = express.Router();
 const Wish = require('../models/Wish');
 
-// GET /api/wishes - Get all wishes/comments with pagination
+// GET /api/wishes - Get all wishes/comments (with optional pagination)
 router.get('/', async (req, res) => {
   try {
-    // Parse pagination parameters with defaults
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    
-    // Count total documents for pagination metadata
-    const total = await Wish.countDocuments();
-    
-    // Fetch wishes with pagination
-    const wishes = await Wish.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    
-    // Send response with pagination metadata
-    res.json({
-      wishes,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
-        hasMore: skip + wishes.length < total
-      }
-    });
+    // Check if pagination is requested
+    if (req.query.page || req.query.limit) {
+      // Parse pagination parameters with defaults
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+      
+      // Count total documents for pagination metadata
+      const total = await Wish.countDocuments();
+      
+      // Fetch wishes with pagination
+      const wishes = await Wish.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+      
+      // Send response with pagination metadata
+      return res.json({
+        wishes,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit),
+          hasMore: skip + wishes.length < total
+        }
+      });
+    } else {
+      // No pagination - return all wishes (original behavior)
+      const wishes = await Wish.find().sort({ createdAt: -1 });
+      return res.json(wishes);
+    }
   } catch (err) {
     console.error('Error fetching wishes:', err);
     res.status(500).json({ error: 'Failed to load wishes' });

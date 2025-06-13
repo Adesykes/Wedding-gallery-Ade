@@ -54,12 +54,27 @@ export default function GuestBook() {
     const fetchWishes = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/wishes?page=1&limit=${WISHES_PER_PAGE}`);
+        const response = await fetch(`${API_BASE}/api/wishes`);
         if (!response.ok) throw new Error('Failed to fetch wishes');
         
         const data = await response.json();
-        setWishes(data.wishes);
-        setHasMore(data.pagination.hasMore);
+        
+        // Handle both the new paginated response and the old array response format
+        if (data.wishes && Array.isArray(data.wishes)) {
+          // New format with pagination
+          setWishes(data.wishes);
+          setHasMore(data.pagination?.hasMore || false);
+        } else if (Array.isArray(data)) {
+          // Old format (direct array)
+          setWishes(data);
+          setHasMore(false); // No pagination in the old format
+        } else {
+          // Unexpected format
+          console.error('Unexpected response format:', data);
+          setWishes([]);
+          setHasMore(false);
+        }
+        
         setPage(1);
       } catch (err) {
         console.error('Error fetching wishes:', err);
@@ -84,9 +99,20 @@ export default function GuestBook() {
       if (!response.ok) throw new Error('Failed to fetch more wishes');
       
       const data = await response.json();
-      setWishes(prev => [...prev, ...data.wishes]);
-      setHasMore(data.pagination.hasMore);
-      setPage(nextPage);
+      
+      // Handle different response formats
+      if (data.wishes && Array.isArray(data.wishes)) {
+        // New paginated format
+        setWishes(prev => [...prev, ...data.wishes]);
+        setHasMore(data.pagination?.hasMore || false);
+        setPage(nextPage);
+      } else if (Array.isArray(data)) {
+        // Old format (direct array) - just add all and disable hasMore
+        setWishes(prev => [...prev, ...data]);
+        setHasMore(false);
+      } else {
+        console.error('Unexpected response format when loading more wishes:', data);
+      }
     } catch (err) {
       console.error('Error loading more wishes:', err);
     } finally {
@@ -136,7 +162,7 @@ export default function GuestBook() {
       
       const newWish = await response.json();
       
-      // Update the wishes list with the new entry at the top
+      // Update the wishes list with the new entry
       setWishes(prevWishes => [newWish, ...prevWishes]);
       
       // Clear the form
@@ -146,9 +172,6 @@ export default function GuestBook() {
       // Show success message
       setSuccess('Thank you for your message!');
       setTimeout(() => setSuccess(''), 5000);
-      
-      // Reset page to 1 and refresh wishes to include the new one
-      // This is handled already by adding the new wish at the top
       
     } catch (err) {
       console.error('Error submitting wish:', err);
