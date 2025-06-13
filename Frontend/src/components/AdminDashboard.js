@@ -150,6 +150,50 @@ function AdminDashboard({ onLogout }) {
     }
   };
 
+  const handleDownloadWishes = async () => {
+    try {
+      // Set loading state
+      const downloadingEl = document.createElement('div');
+      downloadingEl.className = 'admin-download-toast';
+      downloadingEl.textContent = 'Preparing guestbook download...';
+      document.body.appendChild(downloadingEl);
+      
+      // Make request to download wishes
+      const response = await axios({
+        url: `${API_URL}/api/admin/download-wishes`,
+        method: 'GET',
+        responseType: 'blob',
+        headers: { 
+          Authorization: `Bearer ${localStorage.getItem('adminToken')}` 
+        }
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'wedding-guestbook.csv');
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      // Show success message
+      downloadingEl.textContent = 'Guestbook downloaded successfully!';
+      downloadingEl.className = 'admin-download-toast success';
+      setTimeout(() => {
+        if (document.body.contains(downloadingEl)) {
+          document.body.removeChild(downloadingEl);
+        }
+      }, 3000);
+    } catch (err) {
+      console.error('Error downloading wishes:', err);
+      setError('Failed to download guestbook messages');
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -269,35 +313,48 @@ function AdminDashboard({ onLogout }) {
         </>
       ) : (
         /* Wishes Section */
-        <div className="wishes-grid">
-          {wishes.length > 0 ? wishes.map((wish) => (
-            <div key={wish._id} className="wish-card admin-wish-card">
-              <div className="wish-header">
-                <div className="wish-name">{wish.name}</div>
-                <div className="wish-date">
-                  {new Date(wish.createdAt).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
+        <>
+          {wishes.length > 0 && (
+            <div className="wishes-actions">
+              <button 
+                className="admin-button admin-button-primary"
+                onClick={handleDownloadWishes}
+              >
+                Download Guestbook
+              </button>
+            </div>
+          )}
+          
+          <div className="wishes-grid">
+            {wishes.length > 0 ? wishes.map((wish) => (
+              <div key={wish._id} className="wish-card admin-wish-card">
+                <div className="wish-header">
+                  <div className="wish-name">{wish.name}</div>
+                  <div className="wish-date">
+                    {new Date(wish.createdAt).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+                <div className="wish-message">{wish.message}</div>
+                <div className="wish-actions">
+                  <button
+                    className="admin-button admin-button-danger"
+                    onClick={() => handleDeleteWish(wish._id)}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-              <div className="wish-message">{wish.message}</div>
-              <div className="wish-actions">
-                <button
-                  className="admin-button admin-button-danger"
-                  onClick={() => handleDeleteWish(wish._id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          )) : (
-            <div className="empty-state">No guest book messages yet.</div>
-          )}
-        </div>
+            )) : (
+              <div className="empty-state">No guest book messages yet.</div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

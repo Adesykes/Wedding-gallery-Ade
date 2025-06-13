@@ -93,6 +93,39 @@ router.delete('/wishes/:id', verifyToken, async (req, res) => {
   }
 });
 
+// Download wishes as CSV
+router.get('/download-wishes', verifyToken, async (req, res) => {
+  try {
+    const wishes = await Wish.find().sort({ createdAt: -1 });
+    
+    if (wishes.length === 0) {
+      return res.status(404).json({ error: 'No wishes found to download' });
+    }
+    
+    // Create CSV header
+    let csv = 'Name,Message,Date\n';
+    
+    // Add each wish as a row in the CSV
+    wishes.forEach(wish => {
+      const name = wish.name.replace(/,/g, ' ').replace(/"/g, '""');
+      const message = wish.message.replace(/,/g, ' ').replace(/"/g, '""').replace(/\n/g, ' ');
+      const date = new Date(wish.createdAt).toLocaleString('en-GB');
+      
+      csv += `"${name}","${message}","${date}"\n`;
+    });
+    
+    // Set headers for file download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="wedding-guestbook.csv"');
+    
+    // Send CSV data
+    res.send(csv);
+  } catch (err) {
+    console.error('Error creating wishes CSV:', err);
+    res.status(500).json({ error: 'Failed to download wishes' });
+  }
+});
+
 // Download ZIP
 router.get('/download-zip', verifyToken, async (req, res) => {
   try {
