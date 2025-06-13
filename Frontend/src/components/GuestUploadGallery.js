@@ -70,38 +70,37 @@ export default function GuestGalleryUpload() {
     for (const file of files) {
       try {
         let processedFile;
-
-        // Check if compression is needed
+        
         if (file.size > MAX_FILE_SIZE) {
           setError(`Processing ${file.name}... Size: ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
           
           const options = {
             maxWidthOrHeight: 7100,  // Approximately 50MP (7100x7100)
             maxSizeMB: 15,          // 15MB limit
-            useWebWorker: true,
-            onProgress: (progress) => {
-              setError(`Compressing ${file.name}: ${Math.round(progress * 100)}%`);
-            }
+            useWebWorker: true
           };
           
           processedFile = await imageCompression(file, options);
-          setError(`Compressed ${file.name} from ${(file.size / (1024 * 1024)).toFixed(1)}MB to ${(processedFile.size / (1024 * 1024)).toFixed(1)}MB`);
+          
+          if (processedFile.size >= file.size) {
+            // If compression didn't reduce size, use original
+            processedFile = file;
+          }
         } else {
           // File is under size limit, use as is
           processedFile = file;
         }
 
-        // Verify the file is valid
         if (!(processedFile instanceof Blob) || processedFile.size === 0) {
           throw new Error('Invalid file');
         }
 
-        processedFile.preview = URL.createObjectURL(processedFile);
-        processedFile.name = file.name;
-        processedFiles.push(processedFile);
-        
-        // Clear error after successful processing
-        setTimeout(() => setError(null), 3000);
+        const preview = URL.createObjectURL(processedFile);
+        processedFiles.push({
+          ...processedFile,
+          preview,
+          name: file.name
+        });
       } catch (err) {
         console.error('File processing failed:', file.name, err);
         setError(`Failed to process ${file.name}. Please try a different image.`);
@@ -110,7 +109,7 @@ export default function GuestGalleryUpload() {
     }
     
     if (processedFiles.length > 0) {
-      setSelectedFiles(processedFiles);
+      setSelectedFiles(prev => [...prev, ...processedFiles]);
     }
       if (compressedFiles.length > 0) {
       setError(null);
