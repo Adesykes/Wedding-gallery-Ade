@@ -161,24 +161,38 @@ export default function GuestGalleryUpload() {
     } finally {
       setUploading(false);
     }
-  };
-  const removeFile = (index) => {    if (selectedFiles[index]) {
+  };  const removeFile = (index) => {
+    if (selectedFiles[index] && selectedFiles[index].preview) {
       URL.revokeObjectURL(selectedFiles[index].preview);
     }
-    const newFiles = [...selectedFiles];
-    newFiles.splice(index, 1);
+    
+    // Create a completely new array without the file at the specified index
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    
+    // Update state with the new array
     setSelectedFiles(newFiles);
-  };
-  useEffect(() => {    selectedFiles.forEach(file => {
+  };  useEffect(() => {
+    // Only run this effect when selectedFiles array length actually changes
+    if (selectedFiles.length === 0) return;
+    
+    // Clean up any existing previews
+    selectedFiles.forEach(file => {
       if (file.preview) URL.revokeObjectURL(file.preview);
     });
+    
+    // Create new previews for all files
     const filesWithPreview = selectedFiles.map(file => ({
       ...file,
       preview: URL.createObjectURL(file.file)
     }));
+    
     setSelectedFiles(filesWithPreview);
+    
+    // Cleanup function to revoke object URLs when component unmounts or effect reruns
     return () => {
-      filesWithPreview.forEach(file => URL.revokeObjectURL(file.preview));
+      filesWithPreview.forEach(file => {
+        if (file.preview) URL.revokeObjectURL(file.preview);
+      });
     };
   }, [selectedFiles.length]);
   const colors = {
@@ -369,9 +383,13 @@ export default function GuestGalleryUpload() {
           {selectedFiles.length > 0 && (
             <div className="preview-section">
               <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>
+              <p style={{ fontSize: '0.85rem', margin: '0.5rem 0', color: 'var(--text)' }}>
+                Click on a photo to preview, or press × to remove it before uploading
+              </p>
               <div className="preview-grid">
                 {selectedFiles.map((file, i) => (
-                  <div key={i} className="preview-item">                    <img
+                  <div key={i} className="preview-item">
+                    <img
                       src={file.preview}
                       alt={file.name}
                       onClick={() => setPreviewImage(file.preview)}
@@ -386,14 +404,26 @@ export default function GuestGalleryUpload() {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={handleUpload}
-                disabled={uploading}
-                className="upload-button primary"
-                style={{ width: '100%', marginTop: '1rem' }}
-              >
-                {uploading ? 'Uploading...' : '📤 Upload Memories'}
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'center' }}>
+                <label className="upload-button secondary" style={{ margin: 0 }}>
+                  <span>🔄 Change Selection</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                    multiple
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="upload-button primary"
+                  style={{ margin: 0 }}
+                >
+                  {uploading ? 'Uploading...' : '📤 Upload Memories'}
+                </button>
+              </div>
             </div>
           )}
           {error && (
