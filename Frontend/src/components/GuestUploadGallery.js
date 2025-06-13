@@ -112,11 +112,9 @@ export default function GuestGalleryUpload() {
         const res = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
           body: formData,
-        });
-
-        if (!res.ok) throw new Error('Upload failed');
+        });        if (!res.ok) throw new Error('Upload failed');
         const data = await res.json();
-        setPhotos(prev => [...prev, data]);
+        setPhotos(prev => [data, ...prev]);
       }
 
       // Update counts
