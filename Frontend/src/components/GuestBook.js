@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from './PageWrapper';
 import './GuestBook.css';
 import HeartBackground from './HeartBackground';
@@ -7,6 +8,7 @@ const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 const MAX_MESSAGE_LENGTH = 500;
 
 export default function GuestBook() {
+  const navigate = useNavigate();
   const [wishes, setWishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -123,6 +125,9 @@ export default function GuestBook() {
       <HeartBackground />
       <div className="guestbook-container">
         <header className="guestbook-header">
+          <button className="back-button" onClick={() => navigate('/')}>
+            &larr; Back to Welcome
+          </button>
           <h1 className="guestbook-title">Jamie & Leanne</h1>
           <span className="guestbook-date">22nd August 2025</span>
           <p className="guestbook-intro">

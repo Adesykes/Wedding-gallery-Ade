@@ -792,3 +792,34 @@
 .preview-item, .gallery-item, .preview-container {
   cursor: pointer;
 }
+
+/* Gallery navigation buttons */
+.gallery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.gallery-action-button {
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent-dark);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.gallery-action-button:hover {
+  background: white;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.gallery-action-button:active {
+  transform: translateY(0);
+}

@@ -2,6 +2,27 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 1rem;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  border: none;
+  color: #9CAF88;
+  font-size: 1rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.back-button:hover {
+  color: #B76E79;
+  transform: translateX(-3px);
 }
 
 .guestbook-header {

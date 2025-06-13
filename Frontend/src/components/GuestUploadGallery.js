@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import imageCompression from 'browser-image-compression';
 import './GuestUploadGallery.css';
@@ -8,6 +9,7 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 
 export default function GuestGalleryUpload() {
+  const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -322,6 +324,14 @@ export default function GuestGalleryUpload() {
           <p className="welcome-text">
             Welcome to our wedding photo gallery — share your favorite memories with us!
           </p>
+          <div className="gallery-actions">
+            <button className="gallery-action-button" onClick={() => navigate('/')}>
+              &larr; Back to Welcome
+            </button>
+            <button className="gallery-action-button" onClick={() => navigate('/guestbook')}>
+              Sign Guest Book
+            </button>
+          </div>
         </section>        <div className="upload-container">
           <p style={{ marginBottom: '0.5rem' }}>
             You can upload up to {MAX_UPLOADS} photos per device.
