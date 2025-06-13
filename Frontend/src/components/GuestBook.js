@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from './PageWrapper';
 import './GuestBook.css';
@@ -6,6 +6,7 @@ import HeartBackground from './HeartBackground';
 
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 const MAX_MESSAGE_LENGTH = 500;
+const WISHES_PER_PAGE = 10;
 
 export default function GuestBook() {
   const navigate = useNavigate();
@@ -16,6 +17,27 @@ export default function GuestBook() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  // Reference to observe for infinite scroll
+  const observer = useRef();
+  // Reference to the last wish element
+  const lastWishElementRef = useCallback(node => {
+    if (loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMoreWishes();
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [loadingMore, hasMore]);
 
   // Get guestId from localStorage (or generate if not present)
   const getGuestId = () => {
@@ -27,15 +49,18 @@ export default function GuestBook() {
     return guestId;
   };
 
-  // Load all wishes
+  // Load initial wishes
   useEffect(() => {
     const fetchWishes = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/wishes`);
+        setLoading(true);
+        const response = await fetch(`${API_BASE}/api/wishes?page=1&limit=${WISHES_PER_PAGE}`);
         if (!response.ok) throw new Error('Failed to fetch wishes');
         
         const data = await response.json();
-        setWishes(data);
+        setWishes(data.wishes);
+        setHasMore(data.pagination.hasMore);
+        setPage(1);
       } catch (err) {
         console.error('Error fetching wishes:', err);
         setError('Failed to load messages. Please try again later.');
@@ -46,6 +71,28 @@ export default function GuestBook() {
     
     fetchWishes();
   }, []);
+  
+  // Function to load more wishes (called when user scrolls to bottom)
+  const loadMoreWishes = async () => {
+    if (!hasMore || loadingMore) return;
+    
+    try {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      const response = await fetch(`${API_BASE}/api/wishes?page=${nextPage}&limit=${WISHES_PER_PAGE}`);
+      
+      if (!response.ok) throw new Error('Failed to fetch more wishes');
+      
+      const data = await response.json();
+      setWishes(prev => [...prev, ...data.wishes]);
+      setHasMore(data.pagination.hasMore);
+      setPage(nextPage);
+    } catch (err) {
+      console.error('Error loading more wishes:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,7 +136,7 @@ export default function GuestBook() {
       
       const newWish = await response.json();
       
-      // Update the wishes list with the new entry
+      // Update the wishes list with the new entry at the top
       setWishes(prevWishes => [newWish, ...prevWishes]);
       
       // Clear the form
@@ -99,6 +146,9 @@ export default function GuestBook() {
       // Show success message
       setSuccess('Thank you for your message!');
       setTimeout(() => setSuccess(''), 5000);
+      
+      // Reset page to 1 and refresh wishes to include the new one
+      // This is handled already by adding the new wish at the top
       
     } catch (err) {
       console.error('Error submitting wish:', err);
@@ -194,26 +244,60 @@ export default function GuestBook() {
           <h2 className="form-title">Messages & Wishes</h2>
           
           <div className="wishes-container">
-            {loading ? (
-              // Show loading placeholders
+            {loading && wishes.length === 0 ? (
+              // Show loading placeholders for initial load
               Array.from({ length: 6 }).map((_, index) => (
                 <div key={index} className="wish-shimmer"></div>
               ))
             ) : wishes.length > 0 ? (
-              // Show actual wishes
-              wishes.map((wish) => (
-                <div key={wish._id} className="wish-card">
-                  <div className="wish-header">
-                    <div className="wish-name">{wish.name}</div>
-                    <div className="wish-date">{formatDate(wish.createdAt)}</div>
-                  </div>
-                  <div className="wish-message">{wish.message}</div>
-                </div>
-              ))
+              // Show actual wishes with infinite scroll
+              wishes.map((wish, index) => {
+                // If this is the last element, attach the ref for infinite scroll
+                if (wishes.length === index + 1) {
+                  return (
+                    <div 
+                      ref={lastWishElementRef}
+                      key={wish._id} 
+                      className="wish-card"
+                    >
+                      <div className="wish-header">
+                        <div className="wish-name">{wish.name}</div>
+                        <div className="wish-date">{formatDate(wish.createdAt)}</div>
+                      </div>
+                      <div className="wish-message">{wish.message}</div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div key={wish._id} className="wish-card">
+                      <div className="wish-header">
+                        <div className="wish-name">{wish.name}</div>
+                        <div className="wish-date">{formatDate(wish.createdAt)}</div>
+                      </div>
+                      <div className="wish-message">{wish.message}</div>
+                    </div>
+                  );
+                }
+              })
             ) : (
               // Show message when no wishes are available
               <div className="empty-message">
                 Be the first to leave a message for the happy couple!
+              </div>
+            )}
+            
+            {/* Loading indicator for infinite scroll */}
+            {loadingMore && (
+              <div className="loading-more">
+                <div className="wish-shimmer"></div>
+                <div className="wish-shimmer"></div>
+              </div>
+            )}
+            
+            {/* End of content message */}
+            {!hasMore && wishes.length > 0 && (
+              <div className="end-of-wishes">
+                <p>You've reached the end of the messages ♥</p>
               </div>
             )}
           </div>

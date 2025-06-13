@@ -38,8 +38,7 @@ function AdminDashboard({ onLogout }) {
         totalGuests: uniqueGuests,
         totalStorage: `${(totalSize / (1024 * 1024)).toFixed(2)} MB`
       }));
-      
-      setLoading(false);
+        setLoading(false);
     } catch (err) {
       setError('Failed to load photos');
       setLoading(false);
@@ -51,12 +50,15 @@ function AdminDashboard({ onLogout }) {
       const res = await axios.get(`${API_URL}/api/admin/wishes`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
       });
-      setWishes(res.data);
+      
+      // Handle the new response structure with pagination
+      const wishesData = res.data.wishes || res.data; // Support both formats
+      setWishes(wishesData);
       
       // Update wishes-related stats
       setStats(prevStats => ({
         ...prevStats,
-        totalWishes: res.data.length
+        totalWishes: res.data.pagination ? res.data.pagination.total : wishesData.length
       }));
     } catch (err) {
       setError('Failed to load wishes');

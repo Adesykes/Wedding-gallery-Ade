@@ -66,11 +66,34 @@ router.delete('/delete/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Get all wishes
+// Get all wishes with pagination
 router.get('/wishes', verifyToken, async (req, res) => {
   try {
-    const wishes = await Wish.find().sort({ createdAt: -1 });
-    res.json(wishes);
+    // Parse pagination parameters with defaults
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    // Count total documents for pagination metadata
+    const total = await Wish.countDocuments();
+    
+    // Fetch wishes with pagination
+    const wishes = await Wish.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    // Send response with pagination metadata
+    res.json({
+      wishes,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+        hasMore: skip + wishes.length < total
+      }
+    });
   } catch (err) {
     console.error('Error fetching wishes:', err);
     res.status(500).json({ error: 'Failed to fetch wishes' });
