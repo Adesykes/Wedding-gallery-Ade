@@ -13,6 +13,7 @@ export default function GuestGalleryUpload() {
   const [error, setError] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   // Load photos initially (only for this guest)
   useEffect(() => {
@@ -255,6 +256,42 @@ export default function GuestGalleryUpload() {
     setLastTouchDistance(null);
   };
 
+  // Handle opening the lightbox
+  const openLightbox = (imageUrl) => {
+    setLightboxImage(imageUrl);
+    document.body.style.overflow = 'hidden'; // Prevent scrolling when lightbox is open
+  };
+
+  // Handle closing the lightbox
+  const closeLightbox = () => {
+    setLightboxImage(null);
+    document.body.style.overflow = ''; // Restore scrolling
+  };
+
+  // Handle clicking outside the lightbox to close it
+  const handleLightboxClick = (e) => {
+    if (e.target.classList.contains('lightbox-overlay')) {
+      closeLightbox();
+    }
+  };
+
+  // Handle escape key to close lightbox
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    };
+
+    if (lightboxImage) {
+      window.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [lightboxImage]);
+
   return (
     <PageWrapper>
       <div className="guest-upload-gallery">
@@ -401,39 +438,27 @@ export default function GuestGalleryUpload() {
           </div>
         </div>
 
+        {/* Preview Section */}
         {previewImage && (
-          <div 
-            className="lightbox" 
-            onClick={() => {
-              setPreviewImage(null);
-              setScale(1);
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <img
-              src={previewImage}
-              alt="Preview"
-              onClick={e => e.stopPropagation()}
-              style={{
-                transform: `scale(${scale})`,
-                transition: lastTouchDistance ? 'none' : 'transform 0.3s ease',
-                touchAction: 'none'
-              }}
-            />
-            <button
-              className="close-button"
-              onClick={() => {
-                setPreviewImage(null);
-                setScale(1);
-              }}
-              aria-label="Close preview"
-            >
-              ×
-            </button>
+          <div className="preview-container" onClick={() => openLightbox(previewImage)}>
+            <img src={previewImage} alt="Upload preview" />
           </div>
         )}
+
+        {/* Lightbox */}
+        <div 
+          className={`lightbox-overlay ${lightboxImage ? 'active' : ''}`}
+          onClick={handleLightboxClick}
+        >
+          {lightboxImage && (
+            <div className="lightbox-content">
+              <img src={lightboxImage} alt="Enlarged view" className="lightbox-image" />
+              <button className="lightbox-close" onClick={closeLightbox}>
+                ×
+              </button>
+            </div>
+          )}
+        </div>
 
         {error && (
           <div 
