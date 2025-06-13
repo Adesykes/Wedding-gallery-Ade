@@ -68,26 +68,54 @@ export default function GuestGalleryUpload() {
       try {
         let finalFile;
 
-        // Only compress if file is over 25MB
         if (file.size > MAX_FILE_SIZE) {
           setError(`Processing ${file.name}... (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
           
-          const options = {
-            maxWidthOrHeight: 7100, // ~50MP (7100x7100)
-            maxSizeMB: 25,         // 25MB limit
-            useWebWorker: true,
-          };
-          
-          finalFile = await imageCompression(file, options);
+          // First attempt with more conservative settings
+          try {
+            const initialOptions = {
+              maxWidthOrHeight: 7100, // ~50MP
+              maxSizeMB: 25,
+              useWebWorker: true,
+              initialQuality: 0.9,
+              alwaysKeepResolution: true // Prevents unwanted downsizing
+            };
+            
+            finalFile = await imageCompression(file, initialOptions);
+          } catch (firstError) {
+            console.log('First compression attempt failed, trying with reduced settings:', firstError);
+            setError(`Processing large image ${file.name}, please wait...`);
+            
+            // Second attempt with more aggressive compression if first fails
+            const fallbackOptions = {
+              maxWidthOrHeight: 5000,
+              maxSizeMB: 25,
+              useWebWorker: true,
+              initialQuality: 0.8
+            };
+            
+            finalFile = await imageCompression(file, fallbackOptions);
+          }
         } else {
           // Use original file if under size limit
           finalFile = file;
         }
         
+        if (!finalFile || finalFile.size === 0) {
+          throw new Error('Compression resulted in invalid file');
+        }
+        
         finalFile.preview = URL.createObjectURL(finalFile);
         finalFile.name = file.name;
         compressedFiles.push(finalFile);
-        setError(null);
+        
+        // Show success message
+        if (file.size > MAX_FILE_SIZE) {
+          setError(`Successfully processed ${file.name} (${(finalFile.size / (1024 * 1024)).toFixed(1)}MB)`);
+          setTimeout(() => setError(null), 3000);
+        } else {
+          setError(null);
+        }
       } catch (err) {
         console.error('File processing failed:', file.name, err);
         setError(`Failed to process ${file.name}. Please try a different image.`);
