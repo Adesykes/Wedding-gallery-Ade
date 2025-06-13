@@ -56,28 +56,40 @@ export default function GuestGalleryUpload() {
   const handleFileChange = async (e) => {
     setError(null);
     const files = Array.from(e.target.files);
+    
+    // Clear input value to allow selecting the same file again
+    e.target.value = '';
+    
     if (uploadedCount + files.length > MAX_UPLOADS) {
-      setError(`Upload limit exceeded. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
+      setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
       return;
+    }
+
+    // Show loading state for large files
+    if (files.some(file => file.size > 5000000)) { // 5MB
+      setError('Processing large images, please wait...');
     }
 
     const compressedFiles = [];
     for (const file of files) {
-      try {
-        const options = {
+      try {        const options = {
           maxWidthOrHeight: 4000, // ~12MP (4000x3000)
-          maxSizeMB: 4,           // Optional: limit file size (e.g., 4MB)
+          maxSizeMB: 4,          // Optional: limit file size (e.g., 4MB)
           useWebWorker: true,
         };
+        
         const compressedFile = await imageCompression(file, options);
         compressedFile.preview = URL.createObjectURL(compressedFile);
-        compressedFile.name = file.name; // preserve original name if needed
+        compressedFile.name = file.name;
         compressedFiles.push(compressedFile);
       } catch (err) {
-        setError('Image compression failed');
+        console.error('Compression failed:', err);
+        setError('Image processing failed. Please try again with a smaller image.');
         return;
       }
     }
+    
+    setError(null);
     setSelectedFiles(compressedFiles);
   };
 
@@ -211,6 +223,37 @@ export default function GuestGalleryUpload() {
     container?.addEventListener('mousemove', handleMouseMove);
     return () => container?.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  // Add pinch-zoom support for lightbox
+  const [scale, setScale] = useState(1);
+  const [lastTouchDistance, setLastTouchDistance] = useState(null);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setLastTouchDistance(distance);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && lastTouchDistance) {
+      e.preventDefault();
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const delta = distance - lastTouchDistance;
+      setScale(prev => Math.min(Math.max(prev + delta * 0.01, 1), 3));
+      setLastTouchDistance(distance);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setLastTouchDistance(null);
+  };
 
   return (
     <PageWrapper>
@@ -423,19 +466,57 @@ export default function GuestGalleryUpload() {
         </div>
 
         {previewImage && (
-          <div className="lightbox" onClick={() => setPreviewImage(null)}>
+          <div 
+            className="lightbox" 
+            onClick={() => {
+              setPreviewImage(null);
+              setScale(1);
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={previewImage}
               alt="Preview"
               onClick={e => e.stopPropagation()}
+              style={{
+                transform: `scale(${scale})`,
+                transition: lastTouchDistance ? 'none' : 'transform 0.3s ease',
+                touchAction: 'none'
+              }}
             />
             <button
               className="close-button"
-              onClick={() => setPreviewImage(null)}
+              onClick={() => {
+                setPreviewImage(null);
+                setScale(1);
+              }}
               aria-label="Close preview"
             >
               ×
             </button>
+          </div>
+        )}
+
+        {error && (
+          <div 
+            style={{ 
+              position: 'fixed',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0,0,0,0.8)',
+              color: 'white',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '25px',
+              zIndex: 1000,
+              maxWidth: '90%',
+              textAlign: 'center',
+              animation: 'fadeIn 0.3s ease'
+            }}
+          >
+            {error}
           </div>
         )}
       </div>
