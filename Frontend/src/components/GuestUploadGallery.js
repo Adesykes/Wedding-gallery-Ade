@@ -62,58 +62,33 @@ export default function GuestGalleryUpload() {
     if (uploadedCount + files.length > MAX_UPLOADS) {
       setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
       return;
-    }    const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
-    const processedFiles = [];
-    
+    }    const compressedFiles = [];
     for (const file of files) {
       try {
-        // Show size info for large files
-        if (file.size > MAX_FILE_SIZE) {
-          setError(`Processing ${file.name}... Size: ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
+        // Show processing message for large files
+        if (file.size > 5000000) { // 5MB
+          setError(`Processing ${file.name}... Please wait.`);
         }
 
-        // Only compress if needed
-        let finalFile;
-        if (file.size > MAX_FILE_SIZE) {
-          const options = {
-            maxWidthOrHeight: 7100,
-            maxSizeMB: 15,
-            useWebWorker: true
-          };
-          
-          finalFile = await imageCompression(file, options);
-          
-          // If compression didn't help, use original
-          if (finalFile.size >= file.size) {
-            finalFile = file;
-          }
-        } else {
-          finalFile = file;
-        }
-
-        // Create a clean object with only the properties we need
-        const processedFile = new File([finalFile], file.name, {
-          type: file.type,
-          lastModified: file.lastModified
-        });
+        const options = {
+          maxWidthOrHeight: 4000, // ~12MP (4000x3000)
+          maxSizeMB: 4,          // Optional: limit file size (e.g., 4MB)
+          useWebWorker: true,
+        };
         
-        // Add the preview URL
-        processedFile.preview = URL.createObjectURL(finalFile);
-        
-        processedFiles.push(processedFile);
-        
-        if (file.size > MAX_FILE_SIZE) {
-          setError(null);
-        }
+        const compressedFile = await imageCompression(file, options);
+        compressedFile.preview = URL.createObjectURL(compressedFile);
+        compressedFile.name = file.name;
+        compressedFiles.push(compressedFile);
+        setError(null);
       } catch (err) {
         console.error('File processing failed:', file.name, err);
         setError(`Failed to process ${file.name}. Please try a different image.`);
         return;
       }
     }
-    
-    if (processedFiles.length > 0) {
-      setSelectedFiles(processedFiles);
+      if (compressedFiles.length > 0) {
+      setSelectedFiles(compressedFiles);
     }
       if (compressedFiles.length > 0) {
       setError(null);
