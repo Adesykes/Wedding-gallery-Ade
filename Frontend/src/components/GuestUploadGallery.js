@@ -447,27 +447,40 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
           </p>
           
           {selectedFiles.length > 0 && (
-            <div style={{ display: 'flex', gap: '0.5rem', margin: '1.5rem auto', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-                <span>📷 Replace with Camera</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  capture="environment"
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
-              </label>
-              <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-                <span>🖼️ Replace with Gallery</span>                <input
+            <>
+              <div style={{ display: 'flex', gap: '0.5rem', margin: '1.5rem auto', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+                  <span>📷 Replace with Camera</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                    capture="environment"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+                  <span>🖼️ Replace with Gallery</span>                <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                   multiple
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
                 />
-              </label>
-            </div>
+                </label>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem auto' }}>
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="upload-button primary"
+                  style={{ margin: '0.25rem', width: '100%', maxWidth: '250px', fontSize: '1rem', padding: '0.75rem 1.5rem' }}
+                >
+                  {uploading ? 'Uploading...' : '📤 Upload Memories'}
+                </button>
+              </div>
+            </>
           )}
           
           <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />
@@ -564,14 +577,6 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
             {error}
           </div>
         )}              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button
-                  onClick={handleUpload}
-                  disabled={uploading}
-                  className="upload-button primary"
-                  style={{ margin: '0.25rem', width: '100%', maxWidth: '200px' }}
-                >
-                  {uploading ? 'Uploading...' : '📤 Upload Memories'}
-                </button>
               </div>
  </div>
     </PageWrapper>
