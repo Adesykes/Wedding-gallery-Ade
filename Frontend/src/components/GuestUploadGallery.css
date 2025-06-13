@@ -681,14 +681,24 @@
 /* Preview Container Styles */
 .preview-container {
   position: relative;
-  width: 40%;  /* Reduced from 100% */
-  max-width: 300px;  /* Added max-width limit */
+  width: 40%;
+  max-width: 300px;
   margin: var(--space-md) auto;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
-  aspect-ratio: 1;  /* Maintain square aspect ratio */
+  aspect-ratio: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  /* Ensure it stays within the container */
+  display: block;
+  order: -1;  /* Show at the top of the flex container */
+}
+
+.preview-container:hover {
+  transform: scale(1.02);
 }
 
 .preview-container img {

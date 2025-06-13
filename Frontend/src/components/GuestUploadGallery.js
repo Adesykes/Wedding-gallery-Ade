@@ -432,9 +432,7 @@ export default function GuestGalleryUpload() {
 
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--accent)', textAlign: 'center' }}>
             Your Uploaded Photos
-          </h3>
-
-          <div className="gallery-scroll">
+          </h3>          <div className="gallery-scroll">
             {loadingPhotos
               ? Array.from({ length: 6 }).map((_, idx) => (
                   <div key={idx} className="gallery-item loading-shimmer" />
@@ -447,7 +445,7 @@ export default function GuestGalleryUpload() {
                         <img
                           src={photo.url}
                           alt="Wedding upload"
-                          onClick={() => setPreviewImage(photo.url)}
+                          onClick={(e) => openLightbox(photo.url, e)}
                         />
                       </div>
                     ))
@@ -456,13 +454,18 @@ export default function GuestGalleryUpload() {
                   </p>
             }
           </div>
-        </div>
 
-        {/* Preview Section */}
-        {previewImage && (          <div className="preview-container" onClick={(e) => openLightbox(previewImage, e)}>
-            <img src={previewImage} alt="Upload preview" />
-          </div>
-        )}
+          {/* Preview Section - Now inside the container */}
+          {previewImage && (
+            <div className="preview-container">
+              <img
+                src={previewImage}
+                alt="Upload preview"
+                onClick={(e) => openLightbox(previewImage, e)}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Lightbox */}
         <div 
