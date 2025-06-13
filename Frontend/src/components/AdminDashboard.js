@@ -13,6 +13,7 @@ function AdminDashboard({ onLogout }) {
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [activeTab, setActiveTab] = useState('photos'); // Add tab state for switching between photos and wishes
+  const [selectedWish, setSelectedWish] = useState(null); // Added state for viewing wish details
   const [stats, setStats] = useState({
     totalPhotos: 0,
     totalGuests: 0,
@@ -196,6 +197,36 @@ function AdminDashboard({ onLogout }) {
     }
   };
 
+  // Format date to be more readable
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+  
+  // Function to view a wish in full detail
+  const handleViewWish = (wish, e) => {
+    // Prevent triggering delete when clicking to view
+    if (e) {
+      e.stopPropagation();
+    }
+    setSelectedWish(wish);
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+  
+  // Function to close the wish detail view
+  const handleCloseWishView = () => {
+    setSelectedWish(null);
+    // Restore scrolling
+    document.body.style.overflow = '';
+  };
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -357,6 +388,33 @@ function AdminDashboard({ onLogout }) {
             )}
           </div>
         </>
+      )}
+
+      {/* Wish Detail Modal for Admin */}
+      {selectedWish && (
+        <div className="wish-modal-overlay" onClick={handleCloseWishView}>
+          <div className="wish-modal admin-wish-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-modal" onClick={handleCloseWishView}>&times;</button>
+            <div className="wish-modal-header">
+              <h3 className="wish-modal-name">{selectedWish.name}</h3>
+              <div className="wish-modal-date">{formatDate(selectedWish.createdAt)}</div>
+            </div>
+            <div className="wish-modal-message">
+              {selectedWish.message}
+            </div>
+            <div className="wish-modal-actions">
+              <button 
+                onClick={() => {
+                  handleDeleteWish(selectedWish._id);
+                  handleCloseWishView();
+                }} 
+                className="delete-button"
+              >
+                Delete Wish
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -18,6 +18,9 @@ export default function GuestBook() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
+  // Selected wish for full view
+  const [selectedWish, setSelectedWish] = useState(null);
+  
   // Pagination state
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -58,23 +61,9 @@ export default function GuestBook() {
         if (!response.ok) throw new Error('Failed to fetch wishes');
         
         const data = await response.json();
-        
-        // Handle both the new paginated response and the old array response format
-        if (data.wishes && Array.isArray(data.wishes)) {
-          // New format with pagination
-          setWishes(data.wishes);
-          setHasMore(data.pagination?.hasMore || false);
-        } else if (Array.isArray(data)) {
-          // Old format (direct array)
-          setWishes(data);
-          setHasMore(false); // No pagination in the old format
-        } else {
-          // Unexpected format
-          console.error('Unexpected response format:', data);
-          setWishes([]);
-          setHasMore(false);
-        }
-        
+        // Handle both new and old response formats
+        setWishes(data.wishes || data);
+        setHasMore(data.pagination?.hasMore || false);
         setPage(1);
       } catch (err) {
         console.error('Error fetching wishes:', err);
@@ -192,6 +181,20 @@ export default function GuestBook() {
       minute: '2-digit'
     });
   };
+  
+  // Function to view a wish in full detail
+  const handleViewWish = (wish) => {
+    setSelectedWish(wish);
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+  
+  // Function to close the wish detail view
+  const handleCloseWishView = () => {
+    setSelectedWish(null);
+    // Restore scrolling
+    document.body.style.overflow = '';
+  };
 
   return (
     <PageWrapper>
@@ -275,6 +278,12 @@ export default function GuestBook() {
             ) : wishes.length > 0 ? (
               // Show actual wishes with infinite scroll
               wishes.map((wish, index) => {
+                // Prepare the truncated message if needed
+                const isLongMessage = wish.message?.length > 150;
+                const displayMessage = isLongMessage 
+                  ? `${wish.message.substring(0, 150)}...` 
+                  : wish.message;
+                
                 // If this is the last element, attach the ref for infinite scroll
                 if (wishes.length === index + 1) {
                   return (
@@ -282,22 +291,37 @@ export default function GuestBook() {
                       ref={lastWishElementRef}
                       key={wish._id} 
                       className="wish-card"
+                      onClick={() => handleViewWish(wish)}
                     >
                       <div className="wish-header">
                         <div className="wish-name">{wish.name}</div>
                         <div className="wish-date">{formatDate(wish.createdAt)}</div>
                       </div>
-                      <div className="wish-message">{wish.message}</div>
+                      <div className="wish-message">
+                        {displayMessage}
+                        {isLongMessage && (
+                          <button className="read-more-btn">Read More</button>
+                        )}
+                      </div>
                     </div>
                   );
                 } else {
                   return (
-                    <div key={wish._id} className="wish-card">
+                    <div 
+                      key={wish._id} 
+                      className="wish-card"
+                      onClick={() => handleViewWish(wish)}
+                    >
                       <div className="wish-header">
                         <div className="wish-name">{wish.name}</div>
                         <div className="wish-date">{formatDate(wish.createdAt)}</div>
                       </div>
-                      <div className="wish-message">{wish.message}</div>
+                      <div className="wish-message">
+                        {displayMessage}
+                        {isLongMessage && (
+                          <button className="read-more-btn">Read More</button>
+                        )}
+                      </div>
                     </div>
                   );
                 }
@@ -325,6 +349,22 @@ export default function GuestBook() {
             )}
           </div>
         </section>
+        
+        {/* Wish Detail Modal */}
+        {selectedWish && (
+          <div className="wish-modal-overlay" onClick={handleCloseWishView}>
+            <div className="wish-modal" onClick={e => e.stopPropagation()}>
+              <button className="close-modal" onClick={handleCloseWishView}>&times;</button>
+              <div className="wish-modal-header">
+                <h3 className="wish-modal-name">{selectedWish.name}</h3>
+                <div className="wish-modal-date">{formatDate(selectedWish.createdAt)}</div>
+              </div>
+              <div className="wish-modal-message">
+                {selectedWish.message}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PageWrapper>
   );
