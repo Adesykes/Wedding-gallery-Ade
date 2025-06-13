@@ -55,15 +55,20 @@ export default function GuestGalleryUpload() {
   // Sync localStorage count with React state on mount
   useEffect(() => {
     setUploadedCountState(getUploadedCount());
-  }, []);  const handleFileChange = async (e) => {
+  }, []);
+  const handleFileChange = async (e) => {
     setError(null);
     const files = Array.from(e.target.files);
 
+    if (!files.length) return; // Exit if no files were selected
+    
     // Clear input value to allow selecting the same file again
     e.target.value = '';
 
+    // Check if these new files would exceed the upload limit
     if (uploadedCount + files.length > MAX_UPLOADS) {
-      setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);      
+      const remainingSlots = MAX_UPLOADS - uploadedCount;
+      setError(`Upload limit reached. You can select ${remainingSlots > 0 ? remainingSlots : 0} photos maximum.`);      
       return;
     }
 
@@ -120,12 +125,13 @@ export default function GuestGalleryUpload() {
         return;
       }
     }
-      
     if (compressedFiles.length > 0) {
       setError(null);
       setSelectedFiles(prevFiles => {
         // Clean up old preview URLs
         prevFiles.forEach(f => URL.revokeObjectURL(f.preview));
+        
+        // Replace existing selection with new files
         return compressedFiles;
       });
     }
@@ -382,9 +388,8 @@ export default function GuestGalleryUpload() {
           </div>
           {selectedFiles.length > 0 && (
             <div className="preview-section">
-              <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>
-              <p style={{ fontSize: '0.85rem', margin: '0.5rem 0', color: 'var(--text)' }}>
-                Click on a photo to preview, or press × to remove it before uploading
+              <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>              <p style={{ fontSize: '0.85rem', margin: '0.5rem 0', color: 'var(--text)' }}>
+                Click a photo to preview. Click × to remove a photo. Use buttons below to replace selection.
               </p>
               <div className="preview-grid">
                 {selectedFiles.map((file, i) => (
@@ -403,10 +408,19 @@ export default function GuestGalleryUpload() {
                     </button>
                   </div>
                 ))}
-              </div>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'center' }}>
-                <label className="upload-button secondary" style={{ margin: 0 }}>
-                  <span>🔄 Change Selection</span>
+              </div>              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+                  <span>📷 Replace with Camera</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                    capture="environment"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+                  <span>🖼️ Replace with Gallery</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
@@ -419,7 +433,7 @@ export default function GuestGalleryUpload() {
                   onClick={handleUpload}
                   disabled={uploading}
                   className="upload-button primary"
-                  style={{ margin: 0 }}
+                  style={{ margin: '0.25rem' }}
                 >
                   {uploading ? 'Uploading...' : '📤 Upload Memories'}
                 </button>
