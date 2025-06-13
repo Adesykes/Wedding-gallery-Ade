@@ -282,10 +282,31 @@
 
 /* Wishes styles */
 .wishes-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-top: 1.5rem;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 10px;
+  border-radius: 0.75rem;
+  background: var(--admin-surface);
+  padding: 20px;
+  box-shadow: var(--admin-shadow);
+}
+
+.wishes-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wishes-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.wishes-grid::-webkit-scrollbar-thumb {
+  background: var(--admin-primary-light);
+  border-radius: 4px;
 }
 
 .admin-wish-card {
@@ -295,6 +316,7 @@
   box-shadow: var(--admin-shadow);
   border: 1px solid var(--admin-border);
   transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
 }
 
 .admin-wish-card:hover {
@@ -461,5 +483,10 @@
   .bulk-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+  
+  .wishes-grid {
+    max-height: 500px;
+    padding: 15px;
   }
 }
