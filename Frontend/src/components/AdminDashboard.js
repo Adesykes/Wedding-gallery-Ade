@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 
@@ -197,6 +199,111 @@ function AdminDashboard({ onLogout }) {
     }
   };
 
+  const handleDownloadWishesPDF = async () => {
+    try {
+      // Set loading state
+      const downloadingEl = document.createElement('div');
+      downloadingEl.className = 'admin-download-toast';
+      downloadingEl.textContent = 'Preparing PDF guestbook...';
+      document.body.appendChild(downloadingEl);
+      
+      // Fetch all wishes if needed (in case we need to get more than what's shown)
+      let allWishes = wishes;
+      if (wishes.length < stats.totalWishes) {
+        const response = await axios.get(`${API_URL}/api/admin/wishes?limit=1000`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` }
+        });
+        allWishes = response.data.wishes || response.data;
+      }
+      
+      // Create PDF document
+      const pdf = new jsPDF();
+      
+      // Add title
+      pdf.setFont('times', 'italic');
+      pdf.setFontSize(24);
+      pdf.setTextColor(183, 110, 121); // #B76E79
+      pdf.text('Jamie & Leanne', pdf.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      pdf.setFontSize(16);
+      pdf.text('Wedding Guestbook', pdf.internal.pageSize.getWidth() / 2, 30, { align: 'center' });
+      pdf.setFontSize(12);
+      pdf.text('22nd August 2025', pdf.internal.pageSize.getWidth() / 2, 38, { align: 'center' });
+      
+      // Add date
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, pdf.internal.pageSize.getWidth() / 2, 45, { align: 'center' });
+      
+      // Style for header row
+      const tableHeaderStyle = {
+        fillColor: [183, 110, 121], // #B76E79
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center'
+      };
+      
+      // Create wish entries table
+      pdf.autoTable({
+        startY: 55,
+        head: [['Name', 'Message', 'Date']],
+        body: allWishes.map(wish => [
+          wish.name,
+          wish.message,
+          formatDate(wish.createdAt)
+        ]),
+        headStyles: tableHeaderStyle,
+        styles: {
+          overflow: 'linebreak',
+          cellWidth: 'wrap'
+        },
+        columnStyles: {
+          0: { cellWidth: 40 },  // Name column
+          1: { cellWidth: 'auto' }, // Message column (takes remaining space)
+          2: { cellWidth: 40 }   // Date column
+        },
+        margin: { top: 50 },
+        didDrawPage: (data) => {
+          // Add page number at the bottom
+          pdf.setFontSize(10);
+          pdf.text(
+            `Page ${data.pageNumber} of ${pdf.getNumberOfPages()}`,
+            pdf.internal.pageSize.getWidth() / 2, 
+            pdf.internal.pageSize.getHeight() - 10, 
+            { align: 'center' }
+          );
+        }
+      });
+      
+      // Add footer with total count
+      pdf.setFont('helvetica', 'italic');
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(
+        `Total messages: ${allWishes.length}`,
+        pdf.internal.pageSize.getWidth() / 2,
+        pdf.internal.pageSize.getHeight() - 5,
+        { align: 'center' }
+      );
+      
+      // Save PDF
+      pdf.save('jamie-and-leanne-guestbook.pdf');
+      
+      // Show success message
+      downloadingEl.textContent = 'Guestbook PDF downloaded successfully!';
+      downloadingEl.className = 'admin-download-toast success';
+      setTimeout(() => {
+        if (document.body.contains(downloadingEl)) {
+          document.body.removeChild(downloadingEl);
+        }
+      }, 3000);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      setError('Failed to generate PDF guestbook');
+    }
+  };
+
   // Format date to be more readable
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -354,6 +461,12 @@ function AdminDashboard({ onLogout }) {
                 onClick={handleDownloadWishes}
               >
                 Download Guestbook
+              </button>
+              <button 
+                className="admin-button admin-button-primary"
+                onClick={handleDownloadWishesPDF}
+              >
+                Download Guestbook as PDF
               </button>
             </div>
           )}
