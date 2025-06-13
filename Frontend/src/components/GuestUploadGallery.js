@@ -103,11 +103,13 @@ export default function GuestGalleryUpload() {
         // Validate the final file
         if (finalFile.size > MAX_FILE_SIZE) {
           throw new Error(`${file.name} is too large (${(finalFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 35MB.`);
-        }
-
-        finalFile.preview = URL.createObjectURL(finalFile);
-        finalFile.name = file.name;
-        compressedFiles.push(finalFile);
+        }        const processedFile = {
+          file: finalFile,
+          preview: URL.createObjectURL(finalFile),
+          name: file.name,
+          type: file.type
+        };
+        compressedFiles.push(processedFile);
         setError(null);
       } catch (err) {
         console.error('File processing failed:', file.name, err);
@@ -139,7 +141,7 @@ export default function GuestGalleryUpload() {
       // When uploading, include guestId in the form data
       for (const file of selectedFiles) {
         const formData = new FormData();
-        formData.append('photo', file); // file is the File object from input
+        formData.append('photo', file.file); // append the actual File object
         formData.append('guestId', getGuestId());
         const res = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
@@ -159,21 +161,20 @@ export default function GuestGalleryUpload() {
       setUploading(false);
     }
   };
-  const removeFile = (index) => {
-    if (selectedFiles[index]?.preview) {
+  const removeFile = (index) => {    if (selectedFiles[index]) {
       URL.revokeObjectURL(selectedFiles[index].preview);
     }
     const newFiles = [...selectedFiles];
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
   };
-  useEffect(() => {
-    selectedFiles.forEach(file => {
+  useEffect(() => {    selectedFiles.forEach(file => {
       if (file.preview) URL.revokeObjectURL(file.preview);
     });
-    const filesWithPreview = selectedFiles.map(file =>
-      Object.assign(file, { preview: URL.createObjectURL(file) })
-    );
+    const filesWithPreview = selectedFiles.map(file => ({
+      ...file,
+      preview: URL.createObjectURL(file.file)
+    }));
     setSelectedFiles(filesWithPreview);
     return () => {
       filesWithPreview.forEach(file => URL.revokeObjectURL(file.preview));
@@ -361,8 +362,7 @@ export default function GuestGalleryUpload() {
               <strong style={{ color: 'var(--accent)' }}>Files ready to upload:</strong>
               <div className="preview-grid">
                 {selectedFiles.map((file, i) => (
-                  <div key={i} className="preview-item">
-                    <img
+                  <div key={i} className="preview-item">                    <img
                       src={file.preview}
                       alt={file.name}
                       onClick={() => setPreviewImage(file.preview)}
