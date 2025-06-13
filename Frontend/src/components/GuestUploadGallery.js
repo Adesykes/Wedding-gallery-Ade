@@ -4,8 +4,8 @@ import imageCompression from 'browser-image-compression';
 import './GuestUploadGallery.css';
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 const MAX_UPLOADS = 30;
-const MAX_FILE_SIZE = 35 * 1024 * 1024; // 35MB
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 
 export default function GuestGalleryUpload() {
   const [photos, setPhotos] = useState([]);
@@ -72,11 +72,11 @@ export default function GuestGalleryUpload() {
         if (!ACCEPTED_TYPES.includes(file.type.toLowerCase())) {
           throw new Error(`Unsupported file type: ${file.type}. Please use JPEG or PNG images.`);
         }        let finalFile;        const compressionOptions = {
-          maxWidthOrHeight: 3500, // ~12MP (3500x3500)
-          maxSizeMB: 35,         // 35MB limit
+          maxWidthOrHeight: 3000, // ~8MP (3000x3000)
+          maxSizeMB: 15,         // 15MB limit
           useWebWorker: true,
-          initialQuality: 0.9,   // Start with high quality
-          maxIteration: 15       // Allow more compression iterations if needed
+          initialQuality: 0.8,   // Good quality balance
+          maxIteration: 10       // Reasonable compression iterations
         };
 
         // Show processing message for large files
@@ -87,8 +87,8 @@ export default function GuestGalleryUpload() {
           try {
             finalFile = await imageCompression(file, compressionOptions);            // If still too large after compression, try again with more aggressive settings
             if (finalFile.size > MAX_FILE_SIZE) {
-              compressionOptions.maxSizeMB = 20;
-              compressionOptions.initialQuality = 0.8;
+              compressionOptions.maxSizeMB = 8;
+              compressionOptions.initialQuality = 0.7;
               finalFile = await imageCompression(file, compressionOptions);
             }
           } catch (compressionErr) {
@@ -102,7 +102,7 @@ export default function GuestGalleryUpload() {
 
         // Validate the final file
         if (finalFile.size > MAX_FILE_SIZE) {
-          throw new Error(`${file.name} is too large (${(finalFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 35MB.`);
+          throw new Error(`${file.name} is too large (${(finalFile.size / (1024 * 1024)).toFixed(1)}MB). Maximum size is 15MB.`);
         }        const processedFile = {
           file: finalFile,
           preview: URL.createObjectURL(finalFile),
@@ -394,7 +394,7 @@ export default function GuestGalleryUpload() {
             </p>
           )}
           <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
-            Photos will be resized to a maximum of 12 megapixels (3500x3500) and 35MB to preserve good quality.
+            Photos will be resized to a maximum of 8 megapixels (3000x3000) and 15MB for faster uploads.
           </p>
           <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />     
 
