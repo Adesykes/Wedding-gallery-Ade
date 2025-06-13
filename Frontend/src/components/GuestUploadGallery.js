@@ -62,45 +62,49 @@ export default function GuestGalleryUpload() {
     if (uploadedCount + files.length > MAX_UPLOADS) {
       setError(`Upload limit reached. You can upload ${MAX_UPLOADS - uploadedCount} more photos.`);
       return;
-    }
-
-    const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
+    }    const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
     const processedFiles = [];
     
     for (const file of files) {
       try {
-        let processedFile;
-        
+        // Show size info for large files
         if (file.size > MAX_FILE_SIZE) {
           setError(`Processing ${file.name}... Size: ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
-          
+        }
+
+        // Only compress if needed
+        let finalFile;
+        if (file.size > MAX_FILE_SIZE) {
           const options = {
-            maxWidthOrHeight: 7100,  // Approximately 50MP (7100x7100)
-            maxSizeMB: 15,          // 15MB limit
+            maxWidthOrHeight: 7100,
+            maxSizeMB: 15,
             useWebWorker: true
           };
           
-          processedFile = await imageCompression(file, options);
+          finalFile = await imageCompression(file, options);
           
-          if (processedFile.size >= file.size) {
-            // If compression didn't reduce size, use original
-            processedFile = file;
+          // If compression didn't help, use original
+          if (finalFile.size >= file.size) {
+            finalFile = file;
           }
         } else {
-          // File is under size limit, use as is
-          processedFile = file;
+          finalFile = file;
         }
 
-        if (!(processedFile instanceof Blob) || processedFile.size === 0) {
-          throw new Error('Invalid file');
-        }
-
-        const preview = URL.createObjectURL(processedFile);
-        processedFiles.push({
-          ...processedFile,
-          preview,
-          name: file.name
+        // Create a clean object with only the properties we need
+        const processedFile = new File([finalFile], file.name, {
+          type: file.type,
+          lastModified: file.lastModified
         });
+        
+        // Add the preview URL
+        processedFile.preview = URL.createObjectURL(finalFile);
+        
+        processedFiles.push(processedFile);
+        
+        if (file.size > MAX_FILE_SIZE) {
+          setError(null);
+        }
       } catch (err) {
         console.error('File processing failed:', file.name, err);
         setError(`Failed to process ${file.name}. Please try a different image.`);
@@ -109,7 +113,7 @@ export default function GuestGalleryUpload() {
     }
     
     if (processedFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...processedFiles]);
+      setSelectedFiles(processedFiles);
     }
       if (compressedFiles.length > 0) {
       setError(null);
