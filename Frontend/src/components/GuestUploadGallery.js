@@ -459,8 +459,7 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                 />
               </label>
               <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-                <span>🖼️ Replace with Gallery</span>
-                <input
+                <span>🖼️ Replace with Gallery</span>                <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                   multiple
@@ -468,14 +467,6 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                   style={{ display: 'none' }}
                 />
               </label>
-              <button
-                onClick={handleUpload}
-                disabled={uploading}
-                className="upload-button primary"
-                style={{ margin: '0.25rem' }}
-              >
-                {uploading ? 'Uploading...' : '📤 Upload Memories'}
-              </button>
             </div>
           )}
           
@@ -577,7 +568,7 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                   onClick={handleUpload}
                   disabled={uploading}
                   className="upload-button primary"
-                  style={{ margin: '0.25rem' }}
+                  style={{ margin: '0.25rem', width: '100%', maxWidth: '200px' }}
                 >
                   {uploading ? 'Uploading...' : '📤 Upload Memories'}
                 </button>
