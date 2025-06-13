@@ -2,11 +2,12 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 1rem;
-  position: relative;
-  --font-romantic: 'Great Vibes', cursive;
+  position: relative;  --font-romantic: 'Great Vibes', cursive;
   --font-elegant: 'Playfair Display', serif;
   --font-cursive: 'Dancing Script', cursive;
   --font-serif: 'Cormorant Garamond', serif;
+  --font-message: 'Lora', serif;
+  --font-alice: 'Alice', serif;
 }
 
 .navigation-buttons {
@@ -114,6 +115,9 @@
   margin-bottom: 0.5rem;
   color: #4A4E69;
   font-weight: 600;
+  font-family: var(--font-elegant, 'Playfair Display', serif);
+  letter-spacing: 0.5px;
+  font-size: 1.05rem;
 }
 
 .form-input,
@@ -122,13 +126,27 @@
   padding: 0.75rem 1rem;
   border: 1px solid #FFE4E6;
   border-radius: 8px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.form-input {
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  font-family: var(--font-alice, 'Alice', serif);
+  letter-spacing: 0.5px;
 }
 
 .form-textarea {
-  min-height: 120px;
+  min-height: 150px;
   resize: vertical;
+  font-family: var(--font-message, 'Lora', serif);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #4A4E69;
+  padding: 1rem 1.2rem;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  letter-spacing: 0.3px;
 }
 
 .form-input:focus,
@@ -136,6 +154,26 @@
   outline: none;
   border-color: #C8B6FF;
   box-shadow: 0 0 0 3px rgba(200, 182, 255, 0.2);
+  background-color: #ffffff;
+}
+
+/* Add a special focus state for the textarea */
+.form-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(200, 182, 255, 0.2), inset 0 1px 3px rgba(0,0,0,0.02);
+  border-color: #B76E79;
+}
+
+/* Add placeholder styling */
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #b0a9bb;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.form-textarea::placeholder {
+  font-family: var(--font-message, 'Lora', serif);
+  font-size: 1.05rem;
 }
 
 .form-submit {
@@ -143,14 +181,16 @@
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0.85rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: block;
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  font-family: var(--font-cursive, 'Dancing Script', cursive);
+  letter-spacing: 0.8px;
 }
 
 .form-submit:hover {
@@ -164,10 +204,12 @@
 }
 
 .char-count {
-  font-size: 0.8rem;
-  color: #6B7280;
+  font-size: 0.85rem;
+  color: #9CAF88;
   text-align: right;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-alice, 'Alice', serif);
+  font-style: italic;
 }
 
 .wishes-container {
