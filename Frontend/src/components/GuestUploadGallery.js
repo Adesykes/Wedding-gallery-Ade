@@ -52,9 +52,7 @@ export default function GuestGalleryUpload() {
   // Sync localStorage count with React state on mount
   useEffect(() => {
     setUploadedCountState(getUploadedCount());
-  }, []);
-
-  const handleFileChange = async (e) => {
+  }, []);  const handleFileChange = async (e) => {
     setError(null);
     const files = Array.from(e.target.files);
     
@@ -66,32 +64,44 @@ export default function GuestGalleryUpload() {
       return;
     }
 
-    // Show loading state for large files
-    if (files.some(file => file.size > 5000000)) { // 5MB
-      setError('Processing large images, please wait...');
-    }
-
     const compressedFiles = [];
     for (const file of files) {
-      try {        const options = {
-          maxWidthOrHeight: 4000, // ~12MP (4000x3000)
-          maxSizeMB: 4,          // Optional: limit file size (e.g., 4MB)
+      try {
+        // Show processing message for large files
+        if (file.size > 5000000) { // 5MB
+          setError(`Processing ${file.name}... Please wait.`);
+        }
+
+        const options = {
+          maxWidthOrHeight: 4000,  // Back to original 12MP (4000x3000)
+          maxSizeMB: 4,           // Back to original 4MB limit
           useWebWorker: true,
+          onProgress: (progress) => {
+            setError(`Processing ${file.name}: ${Math.round(progress * 100)}%`);
+          }
         };
-        
+
         const compressedFile = await imageCompression(file, options);
+
+        // Verify the compressed file is valid
+        if (!(compressedFile instanceof Blob) || compressedFile.size === 0) {
+          throw new Error('Compression resulted in invalid file');
+        }
+
         compressedFile.preview = URL.createObjectURL(compressedFile);
         compressedFile.name = file.name;
         compressedFiles.push(compressedFile);
+        setError(null);
       } catch (err) {
-        console.error('Compression failed:', err);
-        setError('Image processing failed. Please try again with a smaller image.');
+        console.error('Compression failed for file:', file.name, err);
+        setError(`Failed to process ${file.name}. Please try again or use a different image.`);
         return;
       }
     }
-    
-    setError(null);
-    setSelectedFiles(compressedFiles);
+      if (compressedFiles.length > 0) {
+      setError(null);
+      setSelectedFiles(compressedFiles);
+    }
   };
 
   const handleUpload = async () => {
@@ -253,23 +263,35 @@ export default function GuestGalleryUpload() {
   const handleTouchEnd = () => {
     setLastTouchDistance(null);
   };
-
   // Handle opening the lightbox
-  const openLightbox = (imageUrl) => {
+  const openLightbox = (imageUrl, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setLightboxImage(imageUrl);
-    document.body.style.overflow = 'hidden'; // Prevent scrolling when lightbox is open
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
   };
 
   // Handle closing the lightbox
-  const closeLightbox = () => {
+  const closeLightbox = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setLightboxImage(null);
-    document.body.style.overflow = ''; // Restore scrolling
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
   };
 
   // Handle clicking outside the lightbox to close it
   const handleLightboxClick = (e) => {
-    if (e.target.classList.contains('lightbox-overlay')) {
-      closeLightbox();
+    if (e.target.classList.contains('lightbox-overlay') || 
+        e.target.classList.contains('lightbox-close')) {
+      closeLightbox(e);
     }
   };
 
@@ -437,8 +459,7 @@ export default function GuestGalleryUpload() {
         </div>
 
         {/* Preview Section */}
-        {previewImage && (
-          <div className="preview-container" onClick={() => openLightbox(previewImage)}>
+        {previewImage && (          <div className="preview-container" onClick={(e) => openLightbox(previewImage, e)}>
             <img src={previewImage} alt="Upload preview" />
           </div>
         )}
