@@ -423,18 +423,6 @@
   background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
 }
-  background: var(--color-primary);
-  color: white;
-  padding: var(--space-sm) var(--space-lg);
-  min-width: 120px;
-  box-shadow: var(--shadow-sm);
-}
-
-.admin-reset button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  filter: brightness(1.05);
-}
 
 /* Media queries for responsive design */
 @media (min-width: 768px) {
