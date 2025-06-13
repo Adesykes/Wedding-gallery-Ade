@@ -12,6 +12,10 @@
   --admin-text-light: #6B7280;
   --admin-border: #E5E7EB;
   --admin-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --font-romantic: 'Great Vibes', cursive;
+  --font-elegant: 'Playfair Display', serif;
+  --font-cursive: 'Dancing Script', cursive;
+  --font-serif: 'Cormorant Garamond', serif;
 }
 
 .admin-dashboard {
@@ -35,6 +39,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--admin-text);
+  font-family: var(--font-elegant, 'Playfair Display', serif);
 }
 
 .admin-controls {
@@ -258,6 +263,7 @@
   border-radius: 0.5rem 0.5rem 0 0;
   transition: all 0.2s;
   position: relative;
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
 }
 
 .tab-button:hover {
@@ -267,6 +273,7 @@
 .tab-button.active {
   color: var(--admin-primary);
   font-weight: 600;
+  font-family: var(--font-elegant, 'Playfair Display', serif);
 }
 
 .tab-button.active::after {
@@ -324,6 +331,25 @@
 .admin-wish-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for romantic wish names in admin dashboard */
+.admin-wish-card .wish-name {
+  font-family: var(--font-cursive, 'Dancing Script', cursive);
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+/* End of wishes message */
+.end-of-wishes {
+  font-family: var(--font-cursive, 'Dancing Script', cursive);
+  font-size: 1.2rem;
+}
+
+/* View full button styling */
+.view-full-btn {
+  font-family: var(--font-cursive, 'Dancing Script', cursive);
+  font-size: 1.1rem;
 }
 
 .wish-actions {
@@ -442,8 +468,9 @@
 
 .wish-modal-name {
   color: var(--text);
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin: 0 0 0.5rem;
+  font-family: var(--font-romantic, 'Great Vibes', cursive);
 }
 
 .wish-modal-date {
@@ -454,7 +481,7 @@
 .wish-modal-message {
   color: var(--text);
   line-height: 1.8;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   white-space: pre-wrap;
   flex: 1;
   height: auto;
@@ -462,6 +489,7 @@
   overflow-wrap: break-word;
   word-break: break-word;
   max-width: 100%;
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
 }
 
 .wish-message {
@@ -473,6 +501,8 @@
   word-break: break-word;
   width: 100%;
   max-width: 100%;
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-size: 1.1rem;
 }
 
 .wish-modal-actions {
