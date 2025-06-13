@@ -540,6 +540,36 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
             {error}
           </div>
         )}
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+            <span>📷 Replace with Camera</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+              capture="environment"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+            <span>🖼️ Replace with Gallery</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+              multiple
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <button
+            onClick={handleUpload}
+            disabled={uploading}
+            className="upload-button primary"
+            style={{ margin: '0.25rem' }}
+          >
+            {uploading ? 'Uploading...' : '📤 Upload Memories'}
+          </button>
+        </div>
  </div>
     </PageWrapper>
   );
