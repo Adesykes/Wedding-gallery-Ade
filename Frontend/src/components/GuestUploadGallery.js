@@ -442,11 +442,42 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
 >
               {error}
             </p>
-          )}
-          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
+          )}          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
             Photos will be resized to a maximum of 4 megapixels (2000x2000) and 4MB for faster uploads.
           </p>
-          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />     
+          
+          <div style={{ display: 'flex', gap: '0.5rem', margin: '1.5rem auto', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+              <span>📷 Replace with Camera</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                capture="environment"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
+              <span>🖼️ Replace with Gallery</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                multiple
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <button
+              onClick={handleUpload}
+              disabled={uploading}
+              className="upload-button primary"
+              style={{ margin: '0.25rem' }}
+            >
+              {uploading ? 'Uploading...' : '📤 Upload Memories'}
+            </button>
+          </div>
+          
+          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />
 
           <div className="admin-reset">
             <h4>Admin Reset</h4>
@@ -539,37 +570,16 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
           >
             {error}
           </div>
-        )}
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-            <span>📷 Replace with Camera</span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-              capture="environment"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-          </label>
-          <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
-            <span>🖼️ Replace with Gallery</span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-              multiple
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-          </label>
-          <button
-            onClick={handleUpload}
-            disabled={uploading}
-            className="upload-button primary"
-            style={{ margin: '0.25rem' }}
-          >
-            {uploading ? 'Uploading...' : '📤 Upload Memories'}
-          </button>
-        </div>
+        )}              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="upload-button primary"
+                  style={{ margin: '0.25rem' }}
+                >
+                  {uploading ? 'Uploading...' : '📤 Upload Memories'}
+                </button>
+              </div>
  </div>
     </PageWrapper>
   );
