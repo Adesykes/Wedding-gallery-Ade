@@ -625,28 +625,6 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.ink-cursor {
-  position: absolute;
-  width: 3px;
-  height: 60px;
-  background-color: #B76E79;
-  left: 50%;
-  top: 20%;
-  transform: translateX(-150px);
-  animation: cursor-move 2.8s steps(30) forwards, cursor-blink 0.5s step-end infinite alternate;
-  z-index: 1;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-@keyframes cursor-move {
-  from { transform: translateX(-150px); }
-  to { transform: translateX(150px); }
-}
-
-@keyframes cursor-blink {
-  50% { opacity: 0; }
-}
-
 @keyframes typing {
   from { 
     clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);

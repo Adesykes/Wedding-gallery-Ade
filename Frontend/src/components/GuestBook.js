@@ -269,13 +269,11 @@ export default function GuestBook() {
   };
   return (
     <PageWrapper>
-      <HeartBackground />
-      {showInkAnimation && (
+      <HeartBackground />      {showInkAnimation && (
         <div className="ink-animation-container">
           <div className="ink-animation">
             <div className="ink-text-container">
               <div className="ink-text">Thank you for your wishes</div>
-              <div className="ink-cursor"></div>
             </div>
             <div className="ink-signature">Jamie & Leanne</div>
           </div>
