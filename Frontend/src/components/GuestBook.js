@@ -120,30 +120,25 @@ export default function GuestBook() {
       setError('');
     }
   }, [nameProfanity, messageProfanity, error]);
-
   // Animation states
   const [showInkAnimation, setShowInkAnimation] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   
-  // Create elegant ink writing animation
+  // Animation sequence
   const createInkWritingAnimation = () => {
+    // Start the ink writing animation
     setShowInkAnimation(true);
     
-    // After ink animation completes, show confetti
+    // After ink animation completes, show confetti and then hide both
     setTimeout(() => {
-      setShowInkAnimation(false);
-      createConfettiAnimation();
-    }, 2500); // Match this with the CSS animation duration
-  };
-  
-  // Create celebration confetti animation
-  const createConfettiAnimation = () => {
-    setShowConfetti(true);
-    
-    // Remove confetti after animation
-    setTimeout(() => {
-      setShowConfetti(false);
-    }, 3000);
+      setShowConfetti(true);
+      
+      // After confetti animation completes, hide everything
+      setTimeout(() => {
+        setShowConfetti(false);
+        setShowInkAnimation(false);
+      }, 3000);
+    }, 2000); // Show confetti after the ink animation has had time to display
   };
 
   const handleNameChange = (e) => {
@@ -226,20 +221,18 @@ export default function GuestBook() {
       const newWish = await response.json();
         // Update the wishes list with the new entry
       setWishes(prevWishes => [newWish, ...prevWishes]);
-      
-      // Clear the form
+        // Clear the form
       setName('');
       setMessage('');
       
       // Show success message
       setSuccess('Thank you for your message!');
       
-      // Trigger animations
+      // Trigger animation sequence
       createInkWritingAnimation();
       
+      // Remove success message after animations complete
       setTimeout(() => setSuccess(''), 5000);
-      // Trigger animations on successful submission
-      createInkWritingAnimation();
       
     } catch (err) {
       console.error('Error submitting wish:', err);
@@ -274,28 +267,33 @@ export default function GuestBook() {
     // Restore scrolling
     document.body.style.overflow = '';
   };
-
   return (
     <PageWrapper>
       <HeartBackground />
       {showInkAnimation && (
         <div className="ink-animation-container">
           <div className="ink-animation">
-            <div className="ink-text">Thank you for your wishes</div>
+            <div className="ink-text-container">
+              <div className="ink-text">Thank you for your wishes</div>
+              <div className="ink-cursor"></div>
+            </div>
+            <div className="ink-signature">Jamie & Leanne</div>
           </div>
         </div>
       )}
       
       {showConfetti && (
         <div className="confetti-container">
-          {Array.from({ length: 50 }).map((_, i) => (
+          {Array.from({ length: 80 }).map((_, i) => (
             <div 
               key={i} 
               className="confetti"
               style={{
                 left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                backgroundColor: ['#FFB6C1', '#C8B6FF', '#B76E79', '#FFD700', '#9CAF88'][Math.floor(Math.random() * 5)]
+                width: `${Math.random() * 10 + 5}px`,
+                height: `${Math.random() * 10 + 5}px`,
+                animationDelay: `${Math.random() * 1.5}s`,
+                backgroundColor: ['#FFB6C1', '#C8B6FF', '#B76E79', '#FFD700', '#9CAF88', '#FFCF95'][Math.floor(Math.random() * 6)]
               }}
             ></div>
           ))}
