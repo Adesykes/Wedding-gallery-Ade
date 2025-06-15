@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageWrapper from './PageWrapper';
 import './GuestBook.css';
 import HeartBackground from './HeartBackground';
+import { checkForProfanity } from './utils/profanityCheck';
 
 const API_BASE = 'https://wedding-gallery-ade-backend.onrender.com';
 const MAX_MESSAGE_LENGTH = 500;
@@ -20,6 +21,10 @@ export default function GuestBook() {
   
   // Selected wish for full view
   const [selectedWish, setSelectedWish] = useState(null);
+  
+  // Profanity detection state
+  const [nameProfanity, setNameProfanity] = useState(false);
+  const [messageProfanity, setMessageProfanity] = useState(false);
   
   // Pagination state
   const [page, setPage] = useState(1);
@@ -109,6 +114,45 @@ export default function GuestBook() {
     }
   };
 
+  // Clear error if both fields are free of profanity
+  useEffect(() => {
+    if (!nameProfanity && !messageProfanity && error.includes('inappropriate language')) {
+      setError('');
+    }
+  }, [nameProfanity, messageProfanity, error]);
+
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setName(value);
+    
+    // Check for profanity
+    const hasProfanity = checkForProfanity(value);
+    setNameProfanity(hasProfanity);
+    
+    if (hasProfanity) {
+      setError('Please remove inappropriate language from your name.');
+    } else if (error.includes('inappropriate language')) {
+      // Clear error only if it was a profanity error
+      setError('');
+    }
+  };
+  
+  const handleMessageChange = (e) => {
+    const value = e.target.value;
+    setMessage(value);
+    
+    // Check for profanity
+    const hasProfanity = checkForProfanity(value);
+    setMessageProfanity(hasProfanity);
+    
+    if (hasProfanity) {
+      setError('Please remove inappropriate language from your message.');
+    } else if (error.includes('inappropriate language')) {
+      // Clear error only if it was a profanity error
+      setError('');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -128,6 +172,12 @@ export default function GuestBook() {
       return;
     }
     
+    // Check for profanity one more time before submission
+    if (checkForProfanity(name) || checkForProfanity(message)) {
+      setError('Please remove inappropriate language before submitting.');
+      return;
+    }
+    
     setError('');
     setSubmitting(true);
     
@@ -142,8 +192,7 @@ export default function GuestBook() {
           message: message.trim(),
           guestId: getGuestId()
         }),
-      });
-      
+      });      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to submit message');
@@ -215,35 +264,38 @@ export default function GuestBook() {
             Leave your wishes and thoughts for the happy couple on their special day. 
             Your messages will be cherished for years to come.
           </p>
-        </header>
-
-        <section className="wish-form">
+        </header>        <section className="wish-form">
           <h2 className="form-title">Sign the Guest Book</h2>
+          
+          <p className="guestbook-intro">
+            Leave a heartfelt message for Jamie & Leanne. Please keep your message appropriate for all ages.
+          </p>
           
           {success && <div className="success-message">{success}</div>}
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="name" className="form-label">Your Name</label>
-              <input
+              <label htmlFor="name" className="form-label">Your Name</label>              <input
                 type="text"
                 id="name"
-                className="form-input"
+                className={`form-input ${nameProfanity ? 'profanity-error' : ''}`}
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 placeholder="Enter your name"
                 maxLength={50}
                 disabled={submitting}
               />
+              {nameProfanity && (
+                <div className="error-message">Please remove inappropriate language from your name.</div>
+              )}
             </div>
             
             <div className="form-group">
-              <label htmlFor="message" className="form-label">Your Message</label>
-              <textarea
+              <label htmlFor="message" className="form-label">Your Message</label>              <textarea
                 id="message"
-                className="form-textarea"
+                className={`form-textarea ${messageProfanity ? 'profanity-error' : ''}`}
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={handleMessageChange}
                 placeholder="Write your wishes for the couple here..."
                 maxLength={MAX_MESSAGE_LENGTH + 1}
                 disabled={submitting}
@@ -251,7 +303,10 @@ export default function GuestBook() {
               <div className="char-count">
                 {message.length}/{MAX_MESSAGE_LENGTH} characters
               </div>
-              {error && <div className="error-message">{error}</div>}
+              {messageProfanity && (
+                <div className="error-message">Please remove inappropriate language from your message.</div>
+              )}
+              {error && !messageProfanity && <div className="error-message">{error}</div>}
             </div>
             
             <div className="form-actions">

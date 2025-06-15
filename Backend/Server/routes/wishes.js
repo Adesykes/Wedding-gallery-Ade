@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Wish = require('../models/Wish');
+const { containsProfanity, cleanProfanity } = require('../utils/profanityFilter');
 
 // GET /api/wishes - Get all wishes/comments (with optional pagination)
 router.get('/', async (req, res) => {
@@ -52,9 +53,15 @@ router.post('/', async (req, res) => {
     if (!name || !message) {
       return res.status(400).json({ error: 'Name and message are required' });
     }
-    
-    if (message.length > 500) {
+      if (message.length > 500) {
       return res.status(400).json({ error: 'Message is too long (max 500 characters)' });
+    }
+    
+    // Check for profanity
+    if (containsProfanity(name) || containsProfanity(message)) {
+      return res.status(400).json({ 
+        error: 'Your message contains inappropriate language. Please revise and try again.' 
+      });
     }
     
     // Create and save new wish
