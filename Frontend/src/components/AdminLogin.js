@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PageWrapper from './PageWrapper';
 
 const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 
@@ -53,15 +54,15 @@ function AdminLogin({ onLogin, onLogout }) {
     setPassword('');
     setError(null);
   };
-
   return (
-    <div
-      style={{
-        maxWidth: 320,
-        margin: '40px auto',
-        padding: 20,
-        border: '1px solid #ddd',
-        borderRadius: 8,
+    <PageWrapper>
+      <div
+        style={{
+          maxWidth: 320,
+          margin: '40px auto',
+          padding: 20,
+          border: '1px solid #ddd',
+          borderRadius: 8,
         fontFamily: 'sans-serif',
         textAlign: 'center',
       }}
@@ -120,13 +121,13 @@ function AdminLogin({ onLogin, onLogout }) {
           <button
             onClick={() => navigate('/')}
             disabled={loading}
-            style={{ padding: '8px 12px', marginTop: 16, cursor: 'pointer' }}
-          >
+            style={{ padding: '8px 12px', marginTop: 16, cursor: 'pointer' }}          >
             Back to Home
           </button>
         </>
       )}
     </div>
+    </PageWrapper>
   );
 }
 

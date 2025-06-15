@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import HeartBackground from './HeartBackground';
+import PageWrapper from './PageWrapper';
 import './WelcomeScreen.css';
 
 const WelcomeScreen = () => {
@@ -38,15 +39,15 @@ const WelcomeScreen = () => {
     content?.addEventListener('mousemove', handleMouseMove);
     return () => content?.removeEventListener('mousemove', handleMouseMove);
   }, [createSparkle]);
-
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.6 }}
-      className="welcome-screen"
-    >
+    <PageWrapper>
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.6 }}
+        className="welcome-screen"
+      >
       <HeartBackground />
       <AnimatePresence>
         <motion.div 
@@ -130,13 +131,13 @@ Adrian & Kerry`}
             whileTap={{ scale: 0.98 }}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-          >
+            transition={{ delay: 1.2, duration: 0.5 }}          >
             Admin Login
           </motion.button>
         </motion.div>
       </AnimatePresence>
     </motion.section>
+    </PageWrapper>
   );
 };
 

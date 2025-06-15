@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import PageWrapper from './PageWrapper';
 
 const API_URL = 'https://wedding-gallery-ade-backend.onrender.com';
 
@@ -529,12 +530,12 @@ function AdminDashboard({ onLogout }) {
       </div>
     );
   }
-
   return (
-    <div className="admin-dashboard">
-      <div className="admin-header">
-        <h1 className="admin-title">Wedding Gallery Admin</h1>
-        <div className="admin-controls">
+    <PageWrapper>
+      <div className="admin-dashboard">
+        <div className="admin-header">
+          <h1 className="admin-title">Wedding Gallery Admin</h1>
+          <div className="admin-controls">
           <button className="admin-button admin-button-secondary" onClick={onLogout}>
             Logout
           </button>
@@ -710,14 +711,14 @@ function AdminDashboard({ onLogout }) {
                   handleCloseWishView();
                 }} 
                 className="delete-button"
-              >
-                Delete Wish
+              >                Delete Wish
               </button>
             </div>
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
 

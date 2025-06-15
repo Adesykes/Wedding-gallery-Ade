@@ -7,6 +7,7 @@ import GuestUploadGallery from './components/GuestUploadGallery';
 import GuestBook from './components/GuestBook';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
+import ScrollToTop from './components/ScrollToTop';
 
 // Move this into a child component, so that useLocation is inside Router
 function AnimatedRoutes() {
@@ -26,6 +27,7 @@ function AnimatedRoutes() {
 
   return (
     <AnimatePresence mode="wait">
+      <ScrollToTop />
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<WelcomeScreen />} />
         <Route path="/gallery" element={<GuestUploadGallery />} />
@@ -62,6 +64,7 @@ function AnimatedRoutes() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AnimatedRoutes />
     </Router>
   );

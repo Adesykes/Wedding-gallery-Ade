@@ -1,7 +1,12 @@
 // components/PageWrapper.js
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 export default function PageWrapper({ children }) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}     // Start hidden
