@@ -436,13 +436,12 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                 )}
               </div>
             </div>
-          )}
-          {error && (
+          )}          {error && (
             <p style={{ color: 'var(--error)', marginTop: '1rem', textAlign: 'center', fontWeight: 600 }}
 >
               {error}
             </p>
-          )}          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>    
+          )}          <p style={{ color: '#888', fontSize: '0.875rem', textAlign: 'center', marginTop: '0.5rem', marginBottom: '0.5rem' }}>    
             Photos will be resized to a maximum of 4 megapixels (2000x2000) and 4MB for faster uploads.
           </p>
           
@@ -475,12 +474,11 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                   style={{ margin: '0.25rem', fontSize: '0.85rem' }}
                 >
                   {uploading ? 'Uploading...' : '📤 Upload Memories'}
-                </button>
-              </div>
+                </button>              </div>
             </>
           )}
           
-          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '1rem 0' }} />
+          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '0.5rem 0' }} />
 
           <div className="admin-reset">
             <h4>Admin Reset</h4>
