@@ -478,12 +478,11 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                   style={{ margin: '0.25rem', width: '100%', maxWidth: '250px', fontSize: '1rem', padding: '0.75rem 1.5rem' }}
                 >
                   {uploading ? 'Uploading...' : '📤 Upload Memories'}
-                </button>
-              </div>
+                </button>              </div>
             </>
           )}
           
-          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '2rem 0' }} />
+          <hr style={{ border: 'none', borderTop: '1px dashed var(--border)', margin: '1rem 0' }} />
 
           <div className="admin-reset">
             <h4>Admin Reset</h4>
