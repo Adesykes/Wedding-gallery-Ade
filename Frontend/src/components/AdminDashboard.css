@@ -48,6 +48,31 @@
   align-items: center;
 }
 
+.admin-selection-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: 2rem;
+  padding-left: 2rem;
+  border-left: 1px solid var(--admin-border);
+}
+
+.select-all-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.9rem;
+  color: var(--admin-text-light);
+}
+
+.select-all-checkbox input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+}
+
 .admin-button {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -326,6 +351,11 @@
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+.admin-wish-card.selected {
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid var(--admin-primary);
 }
 
 .admin-wish-card:hover {

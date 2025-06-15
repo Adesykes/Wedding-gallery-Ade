@@ -15,6 +15,7 @@ function AdminDashboard({ onLogout }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [selectedWishes, setSelectedWishes] = useState([]); // Added for multiple wish selection
   const [activeTab, setActiveTab] = useState('photos'); // Add tab state for switching between photos and wishes
   const [selectedWish, setSelectedWish] = useState(null); // Added state for viewing wish details
   const [stats, setStats] = useState({
@@ -151,8 +152,80 @@ function AdminDashboard({ onLogout }) {
         ...prevStats,
         totalWishes: prevStats.totalWishes - 1
       }));
+      
+      // Clear from selectedWishes if it was selected
+      setSelectedWishes(prev => prev.filter(id => id !== wishId));
+      
+      // Close modal if open
+      if (selectedWish && selectedWish._id === wishId) {
+        setSelectedWish(null);
+      }
+      
+      alert('Message deleted successfully');
     } catch (err) {
-      setError('Failed to delete message');
+      console.error('Error deleting wish:', err);
+      alert('Error deleting message. Please try again.');
+    }
+  };
+
+  // Function to handle multiple wish selection
+  const handleWishSelection = (wishId) => {
+    setSelectedWishes(prev => {
+      if (prev.includes(wishId)) {
+        return prev.filter(id => id !== wishId);
+      } else {
+        return [...prev, wishId];
+      }
+    });
+  };
+
+  // Function to handle bulk wish deletion
+  const handleBulkDeleteWishes = async () => {
+    if (selectedWishes.length === 0) {
+      alert('Please select at least one message to delete');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedWishes.length} selected messages?`)) return;
+
+    try {
+      // Delete each selected wish sequentially
+      for (const wishId of selectedWishes) {
+        await axios.delete(
+          `${API_URL}/api/admin/wishes/${wishId}`,
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          }
+        );
+      }
+
+      // Update wishes list
+      setWishes(prev => prev.filter(wish => !selectedWishes.includes(wish._id)));
+      
+      // Update stats
+      setStats(prevStats => ({
+        ...prevStats,
+        totalWishes: prevStats.totalWishes - selectedWishes.length
+      }));
+      
+      // Clear selected wishes
+      setSelectedWishes([]);
+      
+      alert(`${selectedWishes.length} messages deleted successfully`);
+    } catch (err) {
+      console.error('Error deleting wishes:', err);
+      alert('Error deleting messages. Please try again.');
+    }
+  };
+
+  // Function to toggle select all wishes
+  const toggleSelectAllWishes = () => {
+    if (selectedWishes.length === wishes.length) {
+      // If all are selected, clear selection
+      setSelectedWishes([]);
+    } else {
+      // Otherwise select all
+      setSelectedWishes(wishes.map(wish => wish._id));
     }
   };
 
@@ -659,27 +732,60 @@ function AdminDashboard({ onLogout }) {
               </button>
             </div>
           )}
+            <div className="admin-selection-controls">
+            <label className="select-all-checkbox">
+              <input
+                type="checkbox"
+                checked={selectedWishes.length === wishes.length && wishes.length > 0}
+                onChange={toggleSelectAllWishes}
+              />
+              {selectedWishes.length === wishes.length && wishes.length > 0 
+                ? 'Deselect All' 
+                : 'Select All'}
+            </label>
+            {selectedWishes.length > 0 && (
+              <button 
+                className="admin-button admin-button-danger"
+                onClick={handleBulkDeleteWishes}
+              >
+                Delete Selected ({selectedWishes.length})
+              </button>
+            )}
+          </div>
           
           <div className="wishes-grid">
             {wishes.length > 0 ? wishes.map((wish) => (
-              <div key={wish._id} className="wish-card admin-wish-card">
+              <div 
+                key={wish._id} 
+                className={`wish-card admin-wish-card ${selectedWishes.includes(wish._id) ? 'selected' : ''}`}
+                onClick={(e) => {
+                  // Only handle wish view if not clicking checkbox or delete button
+                  if (!e.target.closest('.wish-actions') && e.target.type !== 'checkbox') {
+                    handleViewWish(wish, e);
+                  }
+                }}
+              >
+                <input
+                  type="checkbox"
+                  className="wish-card-checkbox"
+                  checked={selectedWishes.includes(wish._id)}
+                  onChange={() => handleWishSelection(wish._id)}
+                  onClick={(e) => e.stopPropagation()}
+                />
                 <div className="wish-header">
                   <div className="wish-name">{wish.name}</div>
                   <div className="wish-date">
-                    {new Date(wish.createdAt).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {formatDate(wish.createdAt)}
                   </div>
                 </div>
                 <div className="wish-message">{wish.message}</div>
                 <div className="wish-actions">
                   <button
                     className="admin-button admin-button-danger"
-                    onClick={() => handleDeleteWish(wish._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteWish(wish._id);
+                    }}
                   >
                     Delete
                   </button>
