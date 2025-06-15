@@ -121,6 +121,31 @@ export default function GuestBook() {
     }
   }, [nameProfanity, messageProfanity, error]);
 
+  // Animation states
+  const [showInkAnimation, setShowInkAnimation] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Create elegant ink writing animation
+  const createInkWritingAnimation = () => {
+    setShowInkAnimation(true);
+    
+    // After ink animation completes, show confetti
+    setTimeout(() => {
+      setShowInkAnimation(false);
+      createConfettiAnimation();
+    }, 2500); // Match this with the CSS animation duration
+  };
+  
+  // Create celebration confetti animation
+  const createConfettiAnimation = () => {
+    setShowConfetti(true);
+    
+    // Remove confetti after animation
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 3000);
+  };
+
   const handleNameChange = (e) => {
     const value = e.target.value;
     setName(value);
@@ -199,8 +224,7 @@ export default function GuestBook() {
       }
       
       const newWish = await response.json();
-      
-      // Update the wishes list with the new entry
+        // Update the wishes list with the new entry
       setWishes(prevWishes => [newWish, ...prevWishes]);
       
       // Clear the form
@@ -209,7 +233,13 @@ export default function GuestBook() {
       
       // Show success message
       setSuccess('Thank you for your message!');
+      
+      // Trigger animations
+      createInkWritingAnimation();
+      
       setTimeout(() => setSuccess(''), 5000);
+      // Trigger animations on successful submission
+      createInkWritingAnimation();
       
     } catch (err) {
       console.error('Error submitting wish:', err);
@@ -248,6 +278,30 @@ export default function GuestBook() {
   return (
     <PageWrapper>
       <HeartBackground />
+      {showInkAnimation && (
+        <div className="ink-animation-container">
+          <div className="ink-animation">
+            <div className="ink-text">Thank you for your wishes</div>
+          </div>
+        </div>
+      )}
+      
+      {showConfetti && (
+        <div className="confetti-container">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div 
+              key={i} 
+              className="confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                backgroundColor: ['#FFB6C1', '#C8B6FF', '#B76E79', '#FFD700', '#9CAF88'][Math.floor(Math.random() * 5)]
+              }}
+            ></div>
+          ))}
+        </div>
+      )}
+      
       <div className="guestbook-container">
         <header className="guestbook-header">
           <div className="navigation-buttons">
