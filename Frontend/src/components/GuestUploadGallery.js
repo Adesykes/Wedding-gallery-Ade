@@ -446,9 +446,8 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
             Photos will be resized to a maximum of 4 megapixels (2000x2000) and 4MB for faster uploads.
           </p>
           
-          {selectedFiles.length > 0 && (
-            <>
-              <div style={{ display: 'flex', gap: '0.5rem', margin: '1.5rem auto', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {selectedFiles.length > 0 && (            <>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', margin: '0.75rem auto', flexWrap: 'wrap' }}>
                 <label className="upload-button secondary" style={{ margin: '0.25rem', fontSize: '0.85rem' }}>
                   <span>📷 Replace with Camera</span>
                   <input
@@ -468,17 +467,16 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
                   style={{ display: 'none' }}
                 />
                 </label>
-              </div>
               
-              <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem auto' }}>
                 <button
                   onClick={handleUpload}
                   disabled={uploading}
                   className="upload-button primary"
-                  style={{ margin: '0.25rem', width: '100%', maxWidth: '250px', fontSize: '1rem', padding: '0.75rem 1.5rem' }}
+                  style={{ margin: '0.25rem', fontSize: '0.85rem' }}
                 >
                   {uploading ? 'Uploading...' : '📤 Upload Memories'}
-                </button>              </div>
+                </button>
+              </div>
             </>
           )}
           
